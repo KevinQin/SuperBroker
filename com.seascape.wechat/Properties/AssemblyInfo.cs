@@ -5,11 +5,11 @@ using System.Runtime.InteropServices;
 // 有关程序集的一般信息由以下
 // 控制。更改这些特性值可修改
 // 与程序集关联的信息。
-[assembly: AssemblyTitle("SuperBroker")]
+[assembly: AssemblyTitle("com.seascape.wechat")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("SuperBroker")]
+[assembly: AssemblyProduct("com.seascape.wechat")]
 [assembly: AssemblyCopyright("Copyright ©  2017")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
@@ -20,7 +20,7 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(false)]
 
 // 如果此项目向 COM 公开，则下列 GUID 用于类型库的 ID
-[assembly: Guid("07efd0f5-3fe1-44fd-b535-7a4af4db85f1")]
+[assembly: Guid("c25697ff-4487-4c8b-8555-c3f9e369600b")]
 
 // 程序集的版本信息由下列四个值组成: 
 //

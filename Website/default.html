@@ -1,0 +1,168 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title></title>
+  <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+    <link rel="stylesheet" href="//r.edmp.cc/bootstrap3/css/bootstrap.min.css">
+    <link rel="stylesheet" href="//r.edmp.cc/fontawesome/font-awesome.min.css">
+    <link rel="stylesheet" href="//r.edmp.cc/adminlte/css/ionicons.min.css">
+    <link rel="stylesheet" href="//r.edmp.cc/adminlte/css/AdminLTE.min.css">
+    <link rel="stylesheet" href="//r.edmp.cc/icheck/flat/blue.css">    
+    <link rel="stylesheet" href="//r.edmp.cc/adminlte/css/skins/skin-blue.min.css">
+    <link rel="stylesheet" href="//r.edmp.cc/bootStrap-addTabs/css/bootstrap-addtabs.css"/>
+    <link href="/style/style.css" rel="stylesheet" />
+    <!--[if lt IE 9]>
+      <script src="//r.edmp.cc/html5shiv/html5shiv.min.js"></script>
+      <script src="//r.edmp.cc/respond/respond.min.js"></script>
+      <![endif]-->
+
+</head>
+<body class="hold-transition skin-blue sidebar-mini">
+<div class="wrapper">
+  <header class="main-header">
+    <a href="default.html" class="logo">
+      <span class="logo-mini"><img src="images/logo-mini.png"/></span>
+      <span class="logo-lg"><img src="images/logo.png" /></span>
+    </a>
+    
+    <nav class="navbar navbar-static-top">
+      <a href="#" class="sidebar-toggle" data-toggle="offcanvas" role="button">
+        <span class="sr-only">Toggle navigation</span>
+      </a>
+
+      <div class="navbar-custom-menu">
+        <ul class="nav navbar-nav">
+          <li class="dropdown user user-menu">
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+              <img src="http://r.edmp.cc/adminlte/img/default-50x50.gif" class="user-image" data-img="photo" alt="User Image">
+              <span class="hidden-xs" data-name="name">Kevin Qin</span>
+            </a>
+            <ul class="dropdown-menu">
+              <li class="user-header">
+                  <img src="http://r.edmp.cc/adminlte/img/default-50x50.gif" class="img-circle" data-img="photo" alt="User Image">
+                  <p id="uDetail">
+                  Kevin Qin 
+                  <small>系统管理员</small>
+                </p>
+              </li>             
+              <li class="user-footer">
+                <div class="pull-left">
+                  <a href="#" id="btnShowChgPwdDlg" class="btn btn-default btn-flat">修改密码</a>
+                </div>
+                <div class="pull-right">
+                  <a href="#" id="lnkLogout" class="btn btn-default btn-flat">退出登录</a>
+                </div>
+              </li>
+            </ul>
+          </li>         
+        </ul>
+      </div>
+    </nav>
+  </header>
+  <aside class="main-sidebar">
+    <section class="sidebar">
+      <div class="user-panel">
+        <div class="pull-left image">
+            <img src="http://r.edmp.cc/adminlte/img/default-50x50.gif" data-img="photo" class="img-circle" alt="User Image">
+        </div>
+        <div class="pull-left info">
+            <p data-name="name">Kevin Qin</p>
+          <a href="#"><i class="fa fa-circle text-success"></i> 在线</a>
+        </div>
+      </div>
+      <ul class="sidebar-menu">
+        <li class="header">导航菜单</li>               
+        <li><a data-addtab="broker" url="/page/BrokerMng.html"><i class="fa fa-circle-o"></i><span>经纪人管理</span></a></li>
+        <li><a data-addtab="report" url="/page/ReportMng.html"><i class="fa fa-circle-o"></i><span>备案管理</span></a></li>
+        <li><a data-addtab="builder" url="/page/BuilderMng.html"><i class="fa fa-circle-o"></i><span>楼盘管理</span></a></li>
+        <li class="treeview">
+              <a href="#">
+                  <i class="fa fa-folder"></i>
+                  <span>数据中心</span>
+                  <span class="pull-right-container">
+                      <i class="fa fa-angle-left pull-right"></i>
+                  </span>
+              </a>
+              <ul class="treeview-menu">
+                  <li><a data-addtab="d_cate" url="/page/data/builder.html"><i class="fa fa-circle-o"></i><span>楼盘报表</span></a></li>
+                  <li><a data-addtab="d_mng" url="/page/data/broker.html"><i class="fa fa-circle-o"></i><span>经纪人报表</span></a></li>
+                  <li><a data-addtab="d_indb" url="/page/data/report.html"><i class="fa fa-circle-o"></i><span>备案报表</span></a></li>
+                  <li><a data-addtab="d_unit" url="/page/data/fund.html"><i class="fa fa-circle-o"></i><span>财务流水</span></a></li>
+                  <li><a data-addtab="d_price" url="/page/data/custom.html"><i class="fa fa-circle-o"></i><span>客户报表</span></a></li>
+                  <li><a data-addtab="d_price" url="/page/data/member.html"><i class="fa fa-circle-o"></i><span>用户报表</span></a></li>
+              </ul>
+         </li>
+        <li><a data-addtab="setting" url="/page/config.html"><i class="fa fa-circle-o"></i><span>系统设置</span></a></li>
+      </ul>
+    </section>
+  </aside>
+  <div class="content-wrapper">
+      <div class="tabbable" id="tabs">           
+          <ul class="nav nav-tabs" role="tablist">
+            <li role="presentation" class="active">
+                <a href="#home" aria-controls="home" role="tab" data-toggle="tab">欢迎</a>
+            </li>
+          </ul>
+          <div class="tab-content">
+              <div class="tab-pane active" role="tabpanel" id="home">
+                  <iframe style="width:100%;height:100%;" frameborder="0" src="page/index.html"></iframe>
+              </div>
+          </div>
+      </div>     
+  </div>  
+  <div id="changePwdDlg" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title">修改登录密码</h4>
+                </div>
+                <div class="modal-body" >
+                    <div class="row" style="padding:1rem;">
+                        <div class="form-group">
+                            <label for="txtOldPwd">原始密码</label>
+                            <input type="password" class="form-control" id="txtOldPwd" placeholder="登录密码" />
+                        </div>
+                        <div class="form-group">
+                            <label for="txtOldPwd">新密码</label>
+                            <input type="password" class="form-control" id="txtNewPwd" placeholder="新密码" />
+                        </div>
+                        <div class="form-group">
+                            <label for="txtOldPwd">密码确认</label>
+                            <input type="password" class="form-control" id="txtConformPwd" placeholder="再次输入密码" />
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-primary" id="btnSaveOk">确认</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="//r.edmp.cc/jquery/jquery-2.2.3.min.js"></script>
+<script src="//r.edmp.cc/jQueryUI/jquery-ui.min.js"></script>
+<script src="//r.edmp.cc/jquerycookie/jquery.cookie.js"></script>
+<script src="//r.edmp.cc/bootstrap3/js/bootstrap.min.js"></script>
+<script src="//r.edmp.cc/bootStrap-addTabs/bootStrap-addtabs.js"></script>
+<script src="//r.edmp.cc/knob/jquery.knob.js"></script>
+<script src="//r.edmp.cc/slimScroll/jquery.slimscroll.min.js"></script>
+<script src="//r.edmp.cc/fastclick/fastclick.js"></script>
+<script src="//r.edmp.cc/seascape/common.js"></script>
+<script src="/script/app.min.js"></script>
+<script src="/script/index.js"></script>
+<script>
+$(function () {
+    $('#tabs').addtabs({ monitor: '.sidebar-menu' });
+    var RoleId = $get("RoleId");
+    document.title = "全民经纪人管理平台";    
+});
+
+function showToast(msg) {
+    alert(msg);
+}
+</script>
+</body>
+</html>

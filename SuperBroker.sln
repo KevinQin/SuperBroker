@@ -3,7 +3,44 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.26730.10
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SuperBroker", "SuperBroker\SuperBroker.csproj", "{07EFD0F5-3FE1-44FD-B535-7A4AF4DB85F1}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "com.superbroker.model", "com.superbroker.model\com.superbroker.model.csproj", "{D65929D7-7A1F-440C-8676-F3F8A693BF94}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "com.superbroker.data", "com.superbroker.data\com.superbroker.data.csproj", "{B716B0E2-E095-4A0A-8D8A-CB3748BED93E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "com.seascape.wechat", "com.seascape.wechat\com.seascape.wechat.csproj", "{C25697FF-4487-4C8B-8555-C3F9E369600B}"
+EndProject
+Project("{E24C65DC-7377-472B-9ABA-BC803B73C61A}") = "Website", "Website\", "{772C9723-1136-4881-AC67-C3D2E4300DDC}"
+	ProjectSection(WebsiteProperties) = preProject
+		TargetFrameworkMoniker = ".NETFramework,Version%3Dv4.5"
+		ProjectReferences = "{c25697ff-4487-4c8b-8555-c3f9e369600b}|com.seascape.wechat.dll;{d65929d7-7a1f-440c-8676-f3f8a693bf94}|com.superbroker.model.dll;{b716b0e2-e095-4a0a-8d8a-cb3748bed93e}|com.superbroker.data.dll;"
+		Debug.AspNetCompiler.VirtualPath = "/localhost_21998"
+		Debug.AspNetCompiler.PhysicalPath = "Website\"
+		Debug.AspNetCompiler.TargetPath = "PrecompiledWeb\localhost_21998\"
+		Debug.AspNetCompiler.Updateable = "true"
+		Debug.AspNetCompiler.ForceOverwrite = "true"
+		Debug.AspNetCompiler.FixedNames = "false"
+		Debug.AspNetCompiler.Debug = "True"
+		Release.AspNetCompiler.VirtualPath = "/localhost_21998"
+		Release.AspNetCompiler.PhysicalPath = "Website\"
+		Release.AspNetCompiler.TargetPath = "PrecompiledWeb\localhost_21998\"
+		Release.AspNetCompiler.Updateable = "true"
+		Release.AspNetCompiler.ForceOverwrite = "true"
+		Release.AspNetCompiler.FixedNames = "false"
+		Release.AspNetCompiler.Debug = "False"
+		VWDPort = "21998"
+		SlnRelativePath = "Website\"
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Lib", "Lib", "{811DA5DE-4D9F-42C9-9D4C-C4AB08A2CE7D}"
+	ProjectSection(SolutionItems) = preProject
+		Lib\com.seascape.db.dll = Lib\com.seascape.db.dll
+		Lib\com.seascape.tools.dll = Lib\com.seascape.tools.dll
+		Lib\LitJSON.dll = Lib\LitJSON.dll
+		Lib\log4net.dll = Lib\log4net.dll
+		Lib\MySql.Data.dll = Lib\MySql.Data.dll
+		Lib\Newtonsoft.Json.dll = Lib\Newtonsoft.Json.dll
+		Lib\Seascape.WxApi.dll = Lib\Seascape.WxApi.dll
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -11,10 +48,22 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{07EFD0F5-3FE1-44FD-B535-7A4AF4DB85F1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{07EFD0F5-3FE1-44FD-B535-7A4AF4DB85F1}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{07EFD0F5-3FE1-44FD-B535-7A4AF4DB85F1}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{07EFD0F5-3FE1-44FD-B535-7A4AF4DB85F1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D65929D7-7A1F-440C-8676-F3F8A693BF94}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D65929D7-7A1F-440C-8676-F3F8A693BF94}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D65929D7-7A1F-440C-8676-F3F8A693BF94}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D65929D7-7A1F-440C-8676-F3F8A693BF94}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B716B0E2-E095-4A0A-8D8A-CB3748BED93E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B716B0E2-E095-4A0A-8D8A-CB3748BED93E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B716B0E2-E095-4A0A-8D8A-CB3748BED93E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B716B0E2-E095-4A0A-8D8A-CB3748BED93E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C25697FF-4487-4C8B-8555-C3F9E369600B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C25697FF-4487-4C8B-8555-C3F9E369600B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C25697FF-4487-4C8B-8555-C3F9E369600B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C25697FF-4487-4C8B-8555-C3F9E369600B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{772C9723-1136-4881-AC67-C3D2E4300DDC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{772C9723-1136-4881-AC67-C3D2E4300DDC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{772C9723-1136-4881-AC67-C3D2E4300DDC}.Release|Any CPU.ActiveCfg = Debug|Any CPU
+		{772C9723-1136-4881-AC67-C3D2E4300DDC}.Release|Any CPU.Build.0 = Debug|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

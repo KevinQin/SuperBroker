@@ -1,0 +1,156 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>管理 | 消息管理</title>
+    <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+    <link rel="stylesheet" href="/bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/dist/css/font-awesome.min.css">
+    <link rel="stylesheet" href="/dist/css/ionicons.min.css">
+    <link rel="stylesheet" href="/dist/css/AdminLTE.min.css">
+    <link rel="stylesheet" href="/dist/css/skins/skin-blue.min.css">
+    <link rel="stylesheet" href="/plugins/iCheck/all.css" />
+    <link href="/dist/css/style.css" rel="stylesheet" />
+    <!--[if lt IE 9]>
+    <script src="/plugins/html5shiv/html5shiv.min.js"></script>
+    <script src="/plugins/respond/respond.min.js"></script>
+    <![endif]-->
+</head>
+<body>
+    <section class="content" style="padding-top:0;">
+            <div id="userEditor">
+                <div class="panel">
+                    <div class="panel-heading">
+                        <h4>系统参数</h4>
+                    </div>
+                    <div class="panel-body">
+                        <div class="col-xs-12 col-lg-8">                            
+                            <div class="form-group">
+                                <label for="txt_BASE_URL">域名</label>
+                                <input type="text"  class="form-control" id="txt_BASE_URL" placeholder="必须填写，如http://www.qq.com" />
+                            </div>    
+                            <div class="form-group">
+                                <label for="sel_IS_SEND">新邮件通知</label>
+                                <select class="form-control" id="sel_IS_SEND">
+                                    <option value="1">是</option>
+                                    <option value="0">否</option>
+                                </select>
+                            </div> 
+                            <div class="form-group">
+                                <label for="txt_EMAIL_DELAY">邮件检测间隔(秒)</label>
+                                <input type="text" class="form-control" id="txt_EMAIL_DELAY" placeholder="单位：秒，默认60秒" />
+                            </div> 
+                            <div class="form-group">
+                                <label for="txt_EMAIL_ADMIN">邮件管理员账号</label>
+                                <input type="text" class="form-control" id="txt_EMAIL_ADMIN" placeholder="邮件管理员账号" />
+                            </div>  
+                            <div class="form-group">
+                                <label for="txt_EMAIL_PWD">邮件管理员密码</label>
+                                <input type="text" class="form-control" id="txt_EMAIL_PWD" placeholder="邮件管理员密码" />
+                            </div> 
+                            <div class="form-group">
+                                <label for="txt_EMAIL_DOMAIN">邮件域</label>
+                                <input type="text" class="form-control" id="txt_EMAIL_DOMAIN" placeholder="邮件域" />
+                            </div>  
+                            <div class="form-group">
+                                <label for="txt_EMAIL_URL">邮件服务地址</label>
+                                <input type="text" class="form-control" id="txt_EMAIL_URL" placeholder="邮件服务地址" />
+                            </div>  
+                            <div class="form-group">
+                                <label for="sel_MSG_APPID">接收消息的应用</label>
+                                <select class="form-control" id="sel_MSG_APPID"></select>
+                            </div>                     
+                            <div class="form-group" style="text-align:right;margin-top:1.5rem;">                                
+                                <button type="button" class="btn btn-success" id="btnSaveEdit">确认</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>       
+</body>
+<script src="/plugins/jQuery/jquery-2.2.3.min.js"></script>
+<script src="/plugins/jQueryUI/jquery-ui.min.js"></script>
+<script src="/plugins/jQueryCookie/jquery.cookie.js"></script>
+<script src="/bootstrap/js/bootstrap.min.js"></script>
+<script src="/plugins/seascape/common.js"></script>
+<script src="/dist/js/app.min.js"></script>
+<script>
+    var data = null;
+    var rootName = "中国能建山西院";
+    var pn = [];
+    $(document).ready(function () {        
+        load();
+        $("#btnSaveEdit").on("click", save);
+    });
+
+    
+
+    function loadAppList() {
+        $ajax({ fn: 73 }, loadAppCallBack, false);
+
+    }
+
+    function loadAppCallBack(o) {
+        if (o.Return == 0) {
+            for (var i = 0; i < o.data.length; i++) {
+                var obj = o.data[i];
+                var sel = "";
+                if (obj.Id == appID) { sel = "selected";}
+                $("#sel_MSG_APPID").append("<option value='" + obj.Id + "' " + sel + ">" + obj.Name + "</option>")
+            }            
+        }
+    }
+
+    function load() {
+        $ajax({ fn: 71 }, loadCallBack, true);
+    }
+
+    var appID = -1;
+    function loadCallBack(o) {
+        if (o.Return == 0) {
+            loadAppList();
+            for (var i = 0; i < o.data.length; i++) {
+                var key = o.data[i].Key;
+                var value = o.data[i].Value;
+                pn.push(key);
+                if (key == "IS_SEND") {
+                    $("#sel_" + key).val(value);
+                }
+                else if (key == "MSG_APPID") {
+                    appID = value;
+                    continue;
+                }
+                else {
+                    $("#txt_" + key).val(value);
+                }
+            }            
+        }
+    }
+
+    function save() {
+        var value = "";
+        var pv = [];
+        for (var i = 0; i < pn.length; i++) {
+            var key = pn[i];
+            if (key == "IS_SEND" || key == "MSG_APPID") {
+                value = $("#sel_" + key).val();
+            }            
+            else {
+                value = $("#txt_" + key).val();
+            }
+            pv.push(key + "|" + value);
+        }
+        var ps = pv.join("^");
+        $ajax({ fn: 72, ps: ps }, saveCallBack, true);
+    }
+
+    function saveCallBack(o) {
+        if (o.Return == 0) {
+            showToast("参数更新成功")
+        }
+    }
+</script>
+
+</html>
