@@ -69,11 +69,7 @@ namespace com.seascape.wechat
                     webResult = webResult.Replace("}", ",\"tagid_list\":[]}");
                 }
                 Result = webResult;
-                //webResult = "{\"subscribe\":1,\"openid\":\"ozsQauNthXLaMneze4wIdMIwJrYo\",\"nickname\":\"Kevin\",\"sex\":1,\"language\":\"zh_CN\",\"city\":\"太原\",\"province\":\"山西\",\"country\":\"中国\",\"headimgurl\":\"http://wx.qlogo.cn/mmopen/Kwg1Hs1pPD3R7Lia3JMC25AXEsI9X9ziagBdwD6ia9VXgnBt7o2NN4bV8C7ibkZZO92hH2KibT8oLW9dAyn3cQHNAbQ/0\",\"subscribe_time\":1432608497,\"remark\":\"\",\"groupid\":0}";
-                //webResult = "{"subscribe":1,"openid":"oqJ_Zsn5uihUeg_yOGSxWXi9GnHs","nickname":"猫姐","sex":2,"language":"zh_CN","city":"太原","province":"山西","country":"中国","headimgurl":"http://wx.qlogo.cn/mmopen/yWVyZ16008jQ35tpEPHr3l8SdEl2rNzZ5OofahQjxn88wqeT9fzZic9evjTD13jfXTDUN9SZUz1To34OhGTDqF50ZLIlSeaHI/0","subscribe_time":1434442632,"remark":"","groupid":0}
-                //webResult = "{"openid":"oqJ_Zsn5uihUeg_yOGSxWXi9GnHs","nickname":"猫姐","sex":2,"language":"zh_CN","city":"太原","province":"山西","country":"中国","headimgurl":"http://wx.qlogo.cn/mmopen/yWVyZ16008jQ35tpEPHr3l8SdEl2rNzZ5OofahQjxn88wqeT9fzZic9evjTD13jfXTDUN9SZUz1To34OhGTDqF50ZLIlSeaHI/0","subscribe_time":1434442632,"remark":"","groupid":0}
-                //webResult = "{"openid":"oqJ_Zsn5uihUeg_yOGSxWXi9GnHs","nickname":"猫姐","sex":2,"language":"zh_CN","city":"太原","province":"山西","country":"中国","headimgurl":"http://wx.qlogo.cn/mmopen/yWVyZ16008jQ35tpEPHr3l8SdEl2rNzZ5OofahQjxn88wqeT9fzZic9evjTD13jfXTDUN9SZUz1To34OhGTDqF50ZLIlSeaHI/0","privilege":[]}
-                
+               
                 userinfo = LitJson.JsonMapper.ToObject<UserInfo>(webResult);
                 userinfo.requestUrl = requestUrl;
                 return userinfo;

@@ -7,20 +7,23 @@ using System.Security.Cryptography;
 using System.Net;
 using System.IO;
 using com.seascape.tools;
+using System.Xml.Linq;
+using System.Web;
 
 namespace com.seascape.wechat
 {
     public class Common
-    {
-        public static string appid = "";//com.seascape.tools.BasicTool.GetConfigPara("appid");// "wxa5664d5c79e7d6c9";
-        public static string secret = "";//com.seascape.tools.BasicTool.GetConfigPara("secret");//"1f115453bef00428173733eeef3b174a";
-        public static string access_token;
-
+    {       
+        public static string access_token,appid,secret;
+        public static HttpContext c;
         public Common(string _appid,string _secret) {
             appid = _appid;
             secret = _secret;
         }
 
+        public Common(string _appid, string _secret, HttpContext _c):this(_appid,_secret) {
+            c = _c;
+        }
         /*
         grant_type  是  获取access_token填写client_credential  
         appid  是  第三方用户唯一凭证  
@@ -30,25 +33,42 @@ namespace com.seascape.wechat
         /// 获取access_token
         /// </summary>
         /// <returns></returns>
-        public string Get_Access_Token()
+        public AccessToken GetAccessToken()
         {
-            string access_token_Rsa = "";
-            //if (access_token == null || access_token.Length == 0)
+            AccessToken at = null;
+            string GetUrl = "https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid=" + appid + "&secret=" + secret;
+            try
             {
-                string GetUrl = "https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid=" + appid + "&secret=" + secret;
-                try
-                {
-                    access_token_Rsa = com.seascape.tools.BasicTool.webRequest(GetUrl);
-                    JsonData j = JsonMapper.ToObject(access_token_Rsa);
-                    access_token_Rsa = j["access_token"].ToString();
-                    access_token = access_token_Rsa;
-                }
-                catch (Exception e)
-                {
-                    access_token_Rsa = "err:" + e.ToString();
-                }
+                string result = com.seascape.tools.BasicTool.webRequest(GetUrl);
+                JsonData j = JsonMapper.ToObject(result);
+                string accessToken = j["access_token"].ToString();
+                int expirestime = Convert.ToInt32(j["expires_in"].ToString());
+                at = new AccessToken { expirestime = DateTime.Now.AddSeconds(expirestime), token = accessToken };
             }
-            return access_token_Rsa;
+            catch (Exception e)
+            {     
+                    
+            }
+            return at;
+        }        
+
+        public void responseWrite(string msg, bool IsAES=false,string TOKEN="",string AESKEY="",string Nonce="")
+        {
+            if (IsAES)
+            {
+                var wxcpt = new MsgCrypt(TOKEN, AESKEY, appid);
+                var data = "";
+                wxcpt.EncryptMsg(msg, ConvertDateTimeInt(DateTime.Now).ToString(), Nonce, ref data);
+                msg = data;
+            }
+            if (c != null)
+            {
+                c.Response.Write(msg);
+                c.Response.End();
+            }
+            else {
+                WriteLog("HTTP CONTENT IS NULL");
+            }
         }
 
         /// <summary>
@@ -104,6 +124,28 @@ namespace com.seascape.wechat
             return Config;
         }
 
+        public static DateTime UnixTimeToTime(string timeStamp)
+        {
+            DateTime dtStart = TimeZone.CurrentTimeZone.ToLocalTime(new DateTime(1970, 1, 1));
+            long lTime = long.Parse(timeStamp + "0000000");
+            TimeSpan toNow = new TimeSpan(lTime);
+            return dtStart.Add(toNow);
+        }
+
+        public static int ConvertDateTimeInt(System.DateTime time)
+        {
+            System.DateTime startTime = TimeZone.CurrentTimeZone.ToLocalTime(new System.DateTime(1970, 1, 1));
+            return (int)(time - startTime).TotalSeconds;
+        }
+
+        public static void WriteLog(string strMemo)
+        {
+            string filename = "D:\\works\\superbroker\\log\\" + DateTime.Now.ToString("yyMMdd") + ".txt";
+            strMemo = "[" + DateTime.Now.ToString("MM-dd HH:mm:ss") + "]" + strMemo + "\r\n";
+            System.IO.File.AppendAllText(filename, strMemo);
+        }
+
+        
         public class WxConfig
         {
             public string signature { get; set; }
@@ -169,10 +211,10 @@ namespace com.seascape.wechat
         /// 获取二维码
         /// </summary>
         /// <returns></returns>
-        public string GetQR_Code(string access_token_, string FilePath, int SceneID)
+        public string GetQR_Code(string FilePath, int SceneID)
         {
             string OrCode = "";
-            string GetUrl = " https://api.weixin.qq.com/cgi-bin/qrcode/create?access_token=" + access_token_;
+            string GetUrl = " https://api.weixin.qq.com/cgi-bin/qrcode/create?access_token=" + GetAccessToken().token;
             try
             {
                 string ticket = "";
@@ -246,6 +288,43 @@ namespace com.seascape.wechat
             return access_token_UserInfo;
         }
 
+        public static T ConvertObj<T>(string xmlstr)
+        {
+            XElement xdoc = XElement.Parse(xmlstr);           
+            var type = typeof(T);
+            var t = Activator.CreateInstance<T>();          
+            foreach (XElement element in xdoc.Elements())
+            {
+                try
+                {
+                    var pr = type.GetProperty(element.Name.ToString());
+                    if (element.HasElements)
+                    {//这里主要是兼容微信新添加的菜单类型。nnd，竟然有子属性，所以这里就做了个子属性的处理
+                        foreach (var ele in element.Elements())
+                        {
+                            pr = type.GetProperty(ele.Name.ToString());
+                            pr.SetValue(t, Convert.ChangeType(ele.Value, pr.PropertyType), null);
+                        }
+                        continue;
+                    }
+                    if (pr.PropertyType.Name == "MsgType")//获取消息模型
+                    {
+                        pr.SetValue(t, (MsgType)Enum.Parse(typeof(MsgType), element.Value.ToUpper()), null);
+                        continue;
+                    }
+                    if (pr.PropertyType.Name == "EVENT")//获取事件类型。
+                    {
+                        pr.SetValue(t, (EVENT)Enum.Parse(typeof(EVENT), element.Value.ToUpper()), null);
+                        continue;
+                    }
+                    pr.SetValue(t, Convert.ChangeType(element.Value, pr.PropertyType), null);
+                }
+                catch (Exception ex) {
+                    WriteLog(ex.Message);
+                }
+            }
+            return t;
+        }
     }
 
     public class access_token_UserInfo
@@ -253,5 +332,11 @@ namespace com.seascape.wechat
         public string openid { get; set; }
         public string access_token { get; set; }
         public string errcode { get; set; }
+    }
+
+    public class AccessToken
+    {
+        public string token { get; set; }
+        public DateTime expirestime { get; set; }
     }
 }

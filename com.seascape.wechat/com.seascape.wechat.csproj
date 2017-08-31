@@ -38,6 +38,7 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Web" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -46,10 +47,14 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Common.cs" />
+    <Compile Include="Cryptography.cs" />
+    <Compile Include="MessageFactory.cs" />
+    <Compile Include="MsgCrypt.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TMessage.cs" />
     <Compile Include="UserInfo.cs" />
     <Compile Include="WxCard.cs" />
+    <Compile Include="WxMessage.cs" />
     <Compile Include="WxPay.cs" />
     <Compile Include="WxPayForCop.cs" />
     <Compile Include="WxPayRefund.cs" />

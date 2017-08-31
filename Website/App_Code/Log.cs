@@ -30,4 +30,15 @@ public class Log
     {
         DSysLog.Dolog(Tag, info, Level.Warning, c);
     }
+
+    public static void F(string info, HttpContext c, string Tag = "")
+    {
+        string logPath = "d:\\works\\superbroker";
+        if (c != null) {
+            logPath = c.Server.MapPath("~");
+        }
+        string filename = logPath+"\\log\\" + DateTime.Now.ToString("yyMMdd") + ".txt";
+        info = "[" + DateTime.Now.Format() + "]" + info + "\r\n";
+        System.IO.File.AppendAllText(filename, info);
+    }
 }

@@ -16,8 +16,8 @@ using com.superbroker.model;
 public class Handler : IHttpHandler
 {
     public static string HjKeyValue = "Seascape.Fast.Fix";
-    public static string appid = com.seascape.tools.BasicTool.GetConfigPara("appid");
-    public static string secret = com.seascape.tools.BasicTool.GetConfigPara("secret");    
+    public static string APPID = com.seascape.tools.BasicTool.GetConfigPara("appid");
+    public static string SECRET = com.seascape.tools.BasicTool.GetConfigPara("secret");    
     //微信支付商户
     public static string mch_id = com.seascape.tools.BasicTool.GetConfigPara("mch_id");
     //微信支付提交服务器IP
@@ -59,8 +59,8 @@ public class Handler : IHttpHandler
         bool isFail = string.IsNullOrEmpty(c.Request["isFail"]) ? true : true;
         if (isFail || string.IsNullOrEmpty(c.Cache["Global_Access_Token"].ToString()))
         {
-            Access_Token = new Common(appid, secret).Get_Access_Token();
-            c.Cache.Add("Global_Access_Token", Access_Token, null, System.DateTime.UtcNow.AddMinutes(100), TimeSpan.Zero, System.Web.Caching.CacheItemPriority.Normal, null);
+            AccessToken accessToken = new Common(APPID, SECRET).GetAccessToken();
+            c.Cache.Add("Global_Access_Token", accessToken.token, null, accessToken.expirestime, TimeSpan.Zero, System.Web.Caching.CacheItemPriority.Normal, null);
         }
         else
         {

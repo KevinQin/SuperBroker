@@ -109,7 +109,6 @@ namespace com.seascape.wechat
         /// <returns></returns>
         public string Sign_Pay(string[] Arr, string KeyValue)
         {
-            //string KeyValue = "1796699EE40D4CE7B0EC5003B9D0CA26";
             Array.Sort(Arr);
             string Temp = string.Join("&", Arr);
             Temp = Temp + "&key=" + KeyValue;

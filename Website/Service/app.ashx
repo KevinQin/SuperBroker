@@ -14,37 +14,32 @@ using com.seascape.wechat;
 
 
 public class AppHandler:IHttpHandler,IRequiresSessionState {
-    //分页大小
-    //微信支付商户
-    public static string mch_id = com.seascape.tools.BasicTool.GetConfigPara("mch_id");
-    //微信支付接收返回地址
-    public static string notify_url = com.seascape.tools.BasicTool.GetConfigPara("notify_url");
-    //微信支付提交服务器IP
-    public static string client_ip = com.seascape.tools.BasicTool.GetConfigPara("client_ip");
-    //微信支付密钥
-    public static string keyValue = com.seascape.tools.BasicTool.GetConfigPara("keyValue");
-    public static string HjKeyValue = "Seascape.Fast.Fix";
-    //默认代金券信息
-    public static int voucherFee = 10;
-    public static string voucherS = "J";
-
-    //微信卡券配置信息
-    public static string wxcardConfig = "pR7BJwMJKGp4Aun2O7OaMOb9nBTM@10";
     //微信公众号相关
-    public static string appid = com.seascape.tools.BasicTool.GetConfigPara("appid");
-    public static string secret = com.seascape.tools.BasicTool.GetConfigPara("secret");
-
-    //分页大小
-    public static int perPage = 10;
-    public static Admin admin = null;
-    public static string _BASE_URL = "b.seascapeapp.cn";
-    public static string MsgUrl = "http://"+_BASE_URL+"/service/app.ashx";    
-    public static string BaseUrl = "http://"+_BASE_URL+"/";
-
-    public static string DefaultWrokNo = "100";
-
+    static string APPID = com.seascape.tools.BasicTool.GetConfigPara("appid");
+    static string SECRET = com.seascape.tools.BasicTool.GetConfigPara("secret");
+    //微信支付商户
+    static string mch_id = com.seascape.tools.BasicTool.GetConfigPara("mch_id");
+    //微信支付接收返回地址
+    static string notify_url = com.seascape.tools.BasicTool.GetConfigPara("notify_url");
+    //微信支付提交服务器IP
+    static string client_ip = com.seascape.tools.BasicTool.GetConfigPara("client_ip");
+    //微信支付密钥
+    static string keyValue = com.seascape.tools.BasicTool.GetConfigPara("keyValue");
+    static string HjKeyValue = "Seascape.Fast.Fix";
+    //默认代金券信息
+    static int voucherFee = 10;
+    static string voucherS = "J";
+    //微信卡券配置信息
+    static string wxcardConfig = "pR7BJwMJKGp4Aun2O7OaMOb9nBTM@10";
+    //系统相关
+    static int perPage = 15;
+    static string DefaultWrokNo = "100";
+    static string _BASE_URL = com.seascape.tools.BasicTool.GetConfigPara("baseurl");
+    static string MsgUrl = "http://"+_BASE_URL+"/service/app.ashx";
+    static string BaseUrl = "http://"+_BASE_URL+"/";
     static Response response;
     HttpContext _c;
+    static Admin admin = null;
 
     public void ProcessRequest(HttpContext c) {
         response = new Response();
@@ -53,8 +48,6 @@ public class AppHandler:IHttpHandler,IRequiresSessionState {
         c.Response.ContentType = "text/plain";
         c.Response.Write(GetResult(F, c));
     }
-
-
     /// <summary>
     /// 功能导航
     /// </summary>
@@ -69,10 +62,10 @@ public class AppHandler:IHttpHandler,IRequiresSessionState {
             switch (f)
             {
                 case 1:
-                    Result = getOpenId(c);//获取OPENID
+                    Result = GetOpenId(c);//获取OPENID
                     break;
                 case 2:
-                    Result = getMember(c);//获取会员信息
+                    Result = GetMember(c);//获取会员信息
                     break;
                 case 3:
                     Result = CreateCode(c);//用户二维码生成
@@ -99,7 +92,7 @@ public class AppHandler:IHttpHandler,IRequiresSessionState {
                     Result = "";
                     break;
                 case 999:
-                    Result = test(c);
+                    Result = Test(c);
                     break;
                 default:
                     break;
@@ -113,8 +106,11 @@ public class AppHandler:IHttpHandler,IRequiresSessionState {
         return ReplaceTableName(Result);
     }
 
-    public string test(HttpContext c)
+    public string Test(HttpContext c)
     {
+        string xml = "<xml><ToUserName><![CDATA[gh_1ead2193ad3d]]></ToUserName><FromUserName><![CDATA[o3MRawEmK5OK-ringNnTyiNPA6uM]]></FromUserName><CreateTime>1504150583</CreateTime><MsgType><![CDATA[event]]></MsgType><Event><![CDATA[VIEW]]></Event><EventKey><![CDATA[https://open.weixin.qq.com/connect/oauth2/authorize?appid=wx9a6c6b62bc80e7d8&redirect_uri=http%3a%2f%2fb.seascapeapp.cn%2fapp%2fregister.aspx&response_type=code&scope=snsapi_userinfo&state=i#wechat_redirect]]></EventKey><MenuId>413650345</MenuId></xml>";
+        BaseMessage msg= Common.ConvertObj<EventMessage>(xml);
+        Log.F(msg.FromUserName,c);
         return response.Success(DateTime.Now.Format());
     }
 
@@ -140,10 +136,10 @@ public class AppHandler:IHttpHandler,IRequiresSessionState {
     public string GetLocation(HttpContext c) {
         double latitude = Convert.ToDouble(c.Request["latitude"]);
         double longitude = Convert.ToDouble(c.Request["longitude"]);
-        return getFormattedAddress(latitude, longitude);
+        return GetFormattedAddress(latitude, longitude);
     }
 
-    private string getFormattedAddress(double latitude, double longitude)
+    private string GetFormattedAddress(double latitude, double longitude)
     {
         try
         {
@@ -181,7 +177,7 @@ public class AppHandler:IHttpHandler,IRequiresSessionState {
     /// </summary>
     /// <param name="r">Request对象</param>
     /// <returns></returns>
-    public static string getIp(HttpRequest r)
+    public static string GetIp(HttpRequest r)
     {
         string Ip = string.Empty;
         if (r.ServerVariables["HTTP_VIA"] != null)
@@ -214,13 +210,13 @@ public class AppHandler:IHttpHandler,IRequiresSessionState {
     /// </summary>
     /// <param name="c"></param>
     /// <returns></returns>
-    public string getOpenId(HttpContext c)
+    public string GetOpenId(HttpContext c)
     {
         string code = string.IsNullOrEmpty(c.Request["code"]) ? "" : c.Request["code"].ToString();
         string source = string.IsNullOrEmpty(c.Request["source"]) ? "" : c.Request["source"].ToString();
         Log.D("code:"+code,_c);
-        Common.appid = appid;
-        Common.secret = secret;
+        Common.appid = APPID;
+        Common.secret = SECRET;
         access_token_UserInfo at = Common.Get_access_token_UserInfo(code);
         if (!string.IsNullOrEmpty(at.openid))
         {
@@ -270,7 +266,7 @@ public class AppHandler:IHttpHandler,IRequiresSessionState {
     /// </summary>
     /// <param name="c"></param>
     /// <returns></returns>
-    public string getMember(HttpContext c)
+    public string GetMember(HttpContext c)
     {
         string openId = string.IsNullOrEmpty(c.Request["openId"]) ? "" : c.Request["openId"].ToString();
         string source = string.IsNullOrEmpty(c.Request["source"]) ? "" : c.Request["source"].ToString();
@@ -339,13 +335,14 @@ public class AppHandler:IHttpHandler,IRequiresSessionState {
     /// <returns></returns>
     public string CreateCode(HttpContext c)
     {
-        string access_token = Get_Access_Token(c);
         int uid = string.IsNullOrEmpty(c.Request["uid"]) ? 0 : Convert.ToInt16(c.Request["uid"]);
         if (uid > 0)
         {
-            string FilePath = c.Server.MapPath("/QrCode/user/" + uid + ".jpg");
+            string FilePath = c.Server.MapPath("/QrCode/user/");
+            BasicTool.CheckFolder(FilePath,true);
+            FilePath+= uid + ".jpg";
             int SceneID = uid;
-            string Result = new Common(appid, secret).GetQR_Code(access_token, FilePath, SceneID);
+            string Result = new Common(APPID, SECRET).GetQR_Code(FilePath, SceneID);
             Log.D("推荐有礼分享成功["+ uid +"]", _c);
             return response.Success("success");
         }
@@ -400,8 +397,8 @@ public class AppHandler:IHttpHandler,IRequiresSessionState {
         bool isFail = string.IsNullOrEmpty(c.Request["isFail"]) ? true : true;
         if (isFail || string.IsNullOrEmpty(c.Cache["Global_Access_Token"].ToString()))
         {
-            Access_Token = new Common(appid, secret).Get_Access_Token();
-            c.Cache.Add("Global_Access_Token", Access_Token, null, System.DateTime.UtcNow.AddMinutes(100), TimeSpan.Zero, System.Web.Caching.CacheItemPriority.Normal, null);
+            AccessToken accessToken = new Common(APPID, SECRET).GetAccessToken();
+            c.Cache.Add("Global_Access_Token", accessToken.token, null, accessToken.expirestime, TimeSpan.Zero, System.Web.Caching.CacheItemPriority.Normal, null);
         }
         else
         {
@@ -449,12 +446,12 @@ public class AppHandler:IHttpHandler,IRequiresSessionState {
             sb.Append("        {");
             sb.Append("            \"type\": \"view\", ");
             sb.Append("            \"name\": \"加入\", ");
-            sb.Append("            \"url\": \"https://open.weixin.qq.com/connect/oauth2/authorize?appid="+ appid +"&redirect_uri=http%3a%2f%2f"+ _BASE_URL +"%2fapp%2fregister.aspx&response_type=code&scope=snsapi_userinfo&state=i#wechat_redirect\"");
+            sb.Append("            \"url\": \"https://open.weixin.qq.com/connect/oauth2/authorize?appid="+ APPID +"&redirect_uri=http%3a%2f%2f"+ _BASE_URL +"%2fapp%2fregister.aspx&response_type=code&scope=snsapi_userinfo&state=i#wechat_redirect\"");
             sb.Append("        }, ");
             sb.Append("        {");
             sb.Append("            \"type\": \"view\", ");
             sb.Append("            \"name\": \"备案\", ");
-            sb.Append("            \"url\": \"https://open.weixin.qq.com/connect/oauth2/authorize?appid="+ appid +"&redirect_uri=http%3a%2f%2f"+ _BASE_URL +"%2fapp%2freport.aspx&response_type=code&scope=snsapi_userinfo&state=i#wechat_redirect\"");
+            sb.Append("            \"url\": \"https://open.weixin.qq.com/connect/oauth2/authorize?appid="+ APPID +"&redirect_uri=http%3a%2f%2f"+ _BASE_URL +"%2fapp%2freport.aspx&response_type=code&scope=snsapi_userinfo&state=i#wechat_redirect\"");
             sb.Append("        }, ");
             sb.Append("        {");
             sb.Append("           \"name\": \"我的\", ");
@@ -462,22 +459,22 @@ public class AppHandler:IHttpHandler,IRequiresSessionState {
             sb.Append("                {");
             sb.Append("                    \"type\": \"view\", ");
             sb.Append("                    \"name\": \"个人中心\", ");
-            sb.Append("                    \"url\": \"https://open.weixin.qq.com/connect/oauth2/authorize?appid="+ appid +"&redirect_uri=http%3a%2f%2f"+ _BASE_URL +"%2fapp%2fuc.aspx&response_type=code&scope=snsapi_userinfo&state=i#wechat_redirect\"");
+            sb.Append("                    \"url\": \"https://open.weixin.qq.com/connect/oauth2/authorize?appid="+ APPID +"&redirect_uri=http%3a%2f%2f"+ _BASE_URL +"%2fapp%2fuc.aspx&response_type=code&scope=snsapi_userinfo&state=i#wechat_redirect\"");
             sb.Append("                }, ");
             sb.Append("                {");
             sb.Append("                    \"type\": \"view\", ");
             sb.Append("                    \"name\": \"我的备案\", ");
-            sb.Append("                    \"url\": \"https://open.weixin.qq.com/connect/oauth2/authorize?appid="+ appid +"&redirect_uri=http%3a%2f%2f"+ _BASE_URL +"%2fapp%2freport.aspx&response_type=code&scope=snsapi_userinfo&state=i#wechat_redirect\"");
+            sb.Append("                    \"url\": \"https://open.weixin.qq.com/connect/oauth2/authorize?appid="+ APPID +"&redirect_uri=http%3a%2f%2f"+ _BASE_URL +"%2fapp%2freport.aspx&response_type=code&scope=snsapi_userinfo&state=i#wechat_redirect\"");
             sb.Append("                }, ");
             sb.Append("                {");
             sb.Append("                    \"type\": \"view\", ");
             sb.Append("                    \"name\": \"我的佣金\", ");
-            sb.Append("                    \"url\": \"https://open.weixin.qq.com/connect/oauth2/authorize?appid="+ appid +"&redirect_uri=http%3a%2f%2f"+ _BASE_URL +"%2fapp%2ffee.aspx&response_type=code&scope=snsapi_userinfo&state=i#wechat_redirect\"");
+            sb.Append("                    \"url\": \"https://open.weixin.qq.com/connect/oauth2/authorize?appid="+ APPID +"&redirect_uri=http%3a%2f%2f"+ _BASE_URL +"%2fapp%2ffee.aspx&response_type=code&scope=snsapi_userinfo&state=i#wechat_redirect\"");
             sb.Append("                }, ");
             sb.Append("                {");
             sb.Append("                    \"type\": \"view\", ");
             sb.Append("                    \"name\": \"消息中心\", ");
-            sb.Append("                     \"url\": \"https://open.weixin.qq.com/connect/oauth2/authorize?appid="+ appid +"&redirect_uri=http%3a%2f%2f"+ _BASE_URL +"%2fapp%2fnotify.aspx&response_type=code&scope=snsapi_userinfo&state=i#wechat_redirect\"");
+            sb.Append("                     \"url\": \"https://open.weixin.qq.com/connect/oauth2/authorize?appid="+ APPID +"&redirect_uri=http%3a%2f%2f"+ _BASE_URL +"%2fapp%2fnotify.aspx&response_type=code&scope=snsapi_userinfo&state=i#wechat_redirect\"");
             sb.Append("                }");
             sb.Append("            ]");
             sb.Append("        }");
@@ -485,7 +482,7 @@ public class AppHandler:IHttpHandler,IRequiresSessionState {
             sb.Append("}");
             string ACCESS_TOKEN = Get_Access_Token(c);
             string GetUrl = " https://api.weixin.qq.com/cgi-bin/menu/create?access_token=" + ACCESS_TOKEN;
-            string JsonStr = new Common(appid,secret).webRequest(GetUrl, sb.ToString());
+            string JsonStr = new Common(APPID,SECRET).webRequest(GetUrl, sb.ToString());
             JsonData jd = JsonMapper.ToObject(JsonStr);
             if (jd["errcode"].ToString() == "0")
             {
@@ -528,7 +525,7 @@ public class AppHandler:IHttpHandler,IRequiresSessionState {
                 Access_Token = Get_Access_Token(c);
                 //获取网页调用临时票据
                 string r = "";
-                jsApi_ticket = new Common(appid, secret).Get_jsapi_ticket(Access_Token, out r);
+                jsApi_ticket = new Common(APPID, SECRET).Get_jsapi_ticket(Access_Token, out r);
                 Log.D("r:" + r, c);
                 Log.D("jsApi_ticket:" + jsApi_ticket, c);
                 c.Cache.Add("Para_JsApiTicket", jsApi_ticket, null, System.DateTime.UtcNow.AddMinutes(100), TimeSpan.Zero, System.Web.Caching.CacheItemPriority.Normal, null);
@@ -565,7 +562,7 @@ public class AppHandler:IHttpHandler,IRequiresSessionState {
         if (api_ticket.Length > 0)
         {
             long timestamp = 0;
-            string sign = new WxCard().Get_Signature(appid, nonce_str, card_id, api_ticket, out timestamp);
+            string sign = new WxCard().Get_Signature(APPID, nonce_str, card_id, api_ticket, out timestamp);
             if (sign.Length > 0)
             {
                 return card_id + "|" + timestamp + "|" + nonce_str + "|" + sign + "|" + wxcardConfig;
