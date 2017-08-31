@@ -108,10 +108,11 @@ public class AppHandler:IHttpHandler,IRequiresSessionState {
 
     public string Test(HttpContext c)
     {
-        string xml = "<xml><ToUserName><![CDATA[gh_1ead2193ad3d]]></ToUserName><FromUserName><![CDATA[o3MRawEmK5OK-ringNnTyiNPA6uM]]></FromUserName><CreateTime>1504150583</CreateTime><MsgType><![CDATA[event]]></MsgType><Event><![CDATA[VIEW]]></Event><EventKey><![CDATA[https://open.weixin.qq.com/connect/oauth2/authorize?appid=wx9a6c6b62bc80e7d8&redirect_uri=http%3a%2f%2fb.seascapeapp.cn%2fapp%2fregister.aspx&response_type=code&scope=snsapi_userinfo&state=i#wechat_redirect]]></EventKey><MenuId>413650345</MenuId></xml>";
+        string xml = "<xml><ToUserName><![CDATA[gh_1ead2193ad3d]]></ToUserName><FromUserName><![CDATA[o3MRawEmK5OK-ringNnTyiNPA6uM]]></FromUserName><CreateTime>1504167115</CreateTime><MsgType><![CDATA[event]]></MsgType><Event><![CDATA[unsubscribe]]></Event><EventKey><![CDATA[]]></EventKey></xml>";
         BaseMessage msg= Common.ConvertObj<EventMessage>(xml);
         Log.F(msg.FromUserName,c);
-        return response.Success(DateTime.Now.Format());
+        msg.ResText("猜猜我是谁？");
+        return response.Success(msg.MsgType);
     }
 
     public string GetOrderNo()
@@ -171,40 +172,6 @@ public class AppHandler:IHttpHandler,IRequiresSessionState {
         }
     }
 
-
-    /// <summary>
-    /// 得到用户IP
-    /// </summary>
-    /// <param name="r">Request对象</param>
-    /// <returns></returns>
-    public static string GetIp(HttpRequest r)
-    {
-        string Ip = string.Empty;
-        if (r.ServerVariables["HTTP_VIA"] != null)
-        {
-            if (r.ServerVariables["HTTP_X_FORWARDED_FOR"] == null)
-            {
-                if (r.ServerVariables["HTTP_CLIENT_IP"] != null)
-                    Ip = r.ServerVariables["HTTP_CLIENT_IP"].ToString();
-                else
-                    if (r.ServerVariables["REMOTE_ADDR"] != null)
-                    Ip = r.ServerVariables["REMOTE_ADDR"].ToString();
-                else
-                    Ip = "0.0.0.0";
-            }
-            else
-                Ip = r.ServerVariables["HTTP_X_FORWARDED_FOR"].ToString();
-        }
-        else if (r.ServerVariables["REMOTE_ADDR"] != null)
-        {
-            Ip = r.ServerVariables["REMOTE_ADDR"].ToString();
-        }
-        else
-        {
-            Ip = "0.0.0.0";
-        }
-        return Ip;
-    }
     /// <summary>
     /// 通过Code获取OpenID
     /// </summary>
@@ -237,7 +204,12 @@ public class AppHandler:IHttpHandler,IRequiresSessionState {
                     source = source.Replace("i", "1");
                     u.NickName = ui.nickname.Replace("'", "").Replace(@"""", "");
                     u.PhotoUrl = ui.headimgurl;
-                    u.Area = ui.country + "|" + ui.province + "|" + ui.city;
+                    u.Country = ui.country;
+                    u.Province = ui.province;
+                    u.Source = source;
+                    u.IsFllow = false;
+                    u.QrCode = 0;
+                    u.City= ui.city;
                     u.Gender = ui.sex;
                     u.OpenId = ui.openid;
                     u.Mobile = "";
@@ -250,7 +222,6 @@ public class AppHandler:IHttpHandler,IRequiresSessionState {
                 }
             }
             //------------------------------------------
-
             return response.Success(at.openid);
         }
         else
@@ -281,13 +252,18 @@ public class AppHandler:IHttpHandler,IRequiresSessionState {
             {
                 u = new Member();
                 string r = "";
-                UserInfo ui = UserInfo.getUserInfoByGlobal(Get_Access_Token(c), openId, out r);
+                UserInfo ui = UserInfo.getUserInfoByGlobal(WeChat.GetAccessToken(c), openId, out r);
                 Log.D("r:"+ r,_c);
                 if (ui != null && !string.IsNullOrEmpty(ui.nickname))
                 {
                     u.NickName = ui.nickname.Replace("'", "").Replace(@"""", "");
                     u.PhotoUrl = ui.headimgurl;
-                    u.Area = ui.country + "|" + ui.province + "|" + ui.city;
+                    u.Country = ui.country;
+                    u.Province = ui.province;
+                    u.Source = source;
+                    u.IsFllow = false;
+                    u.QrCode = 0;
+                    u.City= ui.city;
                     u.Gender = ui.sex;
                     u.OpenId = ui.openid;
                     u.Mobile = "";
@@ -383,28 +359,7 @@ public class AppHandler:IHttpHandler,IRequiresSessionState {
             new DTemplateMsg().Add(out Id, tmp);
         }
         catch { }
-        new TMessage().Send_TemplateMsg(t, Get_Access_Token(c));
-    }
-
-    /// <summary>
-    /// 获取全局Access_Token
-    /// </summary>
-    /// <param name="c"></param>
-    /// <returns></returns>
-    public string Get_Access_Token(HttpContext c)
-    {
-        string Access_Token = "";
-        bool isFail = string.IsNullOrEmpty(c.Request["isFail"]) ? true : true;
-        if (isFail || string.IsNullOrEmpty(c.Cache["Global_Access_Token"].ToString()))
-        {
-            AccessToken accessToken = new Common(APPID, SECRET).GetAccessToken();
-            c.Cache.Add("Global_Access_Token", accessToken.token, null, accessToken.expirestime, TimeSpan.Zero, System.Web.Caching.CacheItemPriority.Normal, null);
-        }
-        else
-        {
-            Access_Token = c.Cache["Global_Access_Token"].ToString();
-        }
-        return Access_Token;
+        new TMessage().Send_TemplateMsg(t, WeChat.GetAccessToken(c));
     }
 
 
@@ -480,7 +435,7 @@ public class AppHandler:IHttpHandler,IRequiresSessionState {
             sb.Append("        }");
             sb.Append("    ]");
             sb.Append("}");
-            string ACCESS_TOKEN = Get_Access_Token(c);
+            string ACCESS_TOKEN = WeChat.GetAccessToken(c);
             string GetUrl = " https://api.weixin.qq.com/cgi-bin/menu/create?access_token=" + ACCESS_TOKEN;
             string JsonStr = new Common(APPID,SECRET).webRequest(GetUrl, sb.ToString());
             JsonData jd = JsonMapper.ToObject(JsonStr);
@@ -522,7 +477,7 @@ public class AppHandler:IHttpHandler,IRequiresSessionState {
             string Access_Token = "";
             if (isFail || c.Cache["Para_JsApiTicket"] == null || c.Cache["Para_JsApiTicket"].ToString().Length == 0)
             {
-                Access_Token = Get_Access_Token(c);
+                Access_Token = WeChat.GetAccessToken(c);
                 //获取网页调用临时票据
                 string r = "";
                 jsApi_ticket = new Common(APPID, SECRET).Get_jsapi_ticket(Access_Token, out r);
@@ -558,7 +513,7 @@ public class AppHandler:IHttpHandler,IRequiresSessionState {
         string nonce_str = new Random().Next(100000, 999999).ToString();
         string card_id = "";// "pR7BJwD6sYq-5TAhAMQd2U4Ko-9g";
         string r = "";
-        string api_ticket = new WxCard().Get_api_ticket(Get_Access_Token(c), out r);
+        string api_ticket = new WxCard().Get_api_ticket(WeChat.GetAccessToken(c), out r);
         if (api_ticket.Length > 0)
         {
             long timestamp = 0;
@@ -581,7 +536,7 @@ public class AppHandler:IHttpHandler,IRequiresSessionState {
         string card_id = string.IsNullOrEmpty(c.Request["cardid"]) ? "" : c.Request["cardid"].ToString();
         string code = string.IsNullOrEmpty(c.Request["cardno"]) ? "" : c.Request["cardno"].ToString();
         Log.D("DestoryWxCard-card_id:" + card_id + ",code:" + code,c);
-        return response.Success(new WxCard().DestroyCode(Get_Access_Token(c), card_id, code));
+        return response.Success(new WxCard().DestroyCode(WeChat.GetAccessToken(c), card_id, code));
     }
 
     /// <summary>

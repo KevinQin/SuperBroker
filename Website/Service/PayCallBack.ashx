@@ -47,43 +47,7 @@ public class Handler : IHttpHandler
     {
         return "";
     }
-
-    /// <summary>
-    /// 获取全局Access_Token
-    /// </summary>
-    /// <param name="c"></param>
-    /// <returns></returns>
-    public string Get_Access_Token(HttpContext c)
-    {
-        string Access_Token = "";
-        bool isFail = string.IsNullOrEmpty(c.Request["isFail"]) ? true : true;
-        if (isFail || string.IsNullOrEmpty(c.Cache["Global_Access_Token"].ToString()))
-        {
-            AccessToken accessToken = new Common(APPID, SECRET).GetAccessToken();
-            c.Cache.Add("Global_Access_Token", accessToken.token, null, accessToken.expirestime, TimeSpan.Zero, System.Web.Caching.CacheItemPriority.Normal, null);
-        }
-        else
-        {
-            Access_Token = c.Cache["Global_Access_Token"].ToString();
-        }
-        return Access_Token;
-    }
-    
-    /// <summary>
-    /// 输入流转字符串
-    /// </summary>
-    /// <param name="c"></param>
-    /// <returns></returns>
-    public string ConvertStream(HttpContext c)
-    {
-        System.IO.Stream sm = c.Request.InputStream;//获取post数据
-        int len = (int)sm.Length;//post数据的长度
-        byte[] inputByts = new byte[len];//存储post数据
-        sm.Read(inputByts, 0, len);//将post数据写入数组
-        sm.Close();//关闭流
-        string data = Encoding.GetEncoding("utf-8").GetString(inputByts);//转换为unicode字符串  
-        return data;
-    }
+      
 
     public bool IsReusable
     {

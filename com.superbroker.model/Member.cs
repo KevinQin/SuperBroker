@@ -12,7 +12,11 @@ namespace com.superbroker.model
         /// <summary>
         /// OpenId
         /// </summary>
-        public string OpenId { get; set; }       
+        public string OpenId { get; set; }
+        /// <summary>
+        /// UnionId
+        /// </summary>
+        public string UnionId { get; set; }
         /// <summary>
         /// 姓名
         /// </summary>
@@ -26,9 +30,17 @@ namespace com.superbroker.model
         /// </summary>
         public string PhotoUrl { get; set; }
         /// <summary>
-        /// 所在区域
+        /// 国家
         /// </summary>
-        public string Area { get; set; }
+        public string Country { get; set; }
+        /// <summary>
+        /// 省
+        /// </summary>
+        public string Province { get; set; }
+        /// <summary>
+        /// 市
+        /// </summary>
+        public string City { get; set; }
         /// <summary>
         /// 性别
         /// </summary>
@@ -37,6 +49,18 @@ namespace com.superbroker.model
         /// 微信昵称
         /// </summary>
         public string NickName { get; set; }
+        /// <summary>
+        /// 来源
+        /// </summary>
+        public string Source { get; set; }
+        /// <summary>
+        /// 关注二维码编码
+        /// </summary>
+        public int QrCode { get; set; }
+        /// <summary>
+        /// 是否已关注
+        /// </summary>
+        public bool IsFllow { get; set; }
         /// <summary>
         /// 备注
         /// </summary>

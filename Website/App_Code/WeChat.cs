@@ -19,6 +19,40 @@ public class WeChat
 		//
 	}
 
+    /// <summary>
+    /// 得到用户IP
+    /// </summary>
+    /// <param name="r">Request对象</param>
+    /// <returns></returns>
+    public static string GetIp(HttpRequest r)
+    {
+        string Ip = string.Empty;
+        if (r.ServerVariables["HTTP_VIA"] != null)
+        {
+            if (r.ServerVariables["HTTP_X_FORWARDED_FOR"] == null)
+            {
+                if (r.ServerVariables["HTTP_CLIENT_IP"] != null)
+                    Ip = r.ServerVariables["HTTP_CLIENT_IP"].ToString();
+                else
+                    if (r.ServerVariables["REMOTE_ADDR"] != null)
+                    Ip = r.ServerVariables["REMOTE_ADDR"].ToString();
+                else
+                    Ip = "0.0.0.0";
+            }
+            else
+                Ip = r.ServerVariables["HTTP_X_FORWARDED_FOR"].ToString();
+        }
+        else if (r.ServerVariables["REMOTE_ADDR"] != null)
+        {
+            Ip = r.ServerVariables["REMOTE_ADDR"].ToString();
+        }
+        else
+        {
+            Ip = "0.0.0.0";
+        }
+        return Ip;
+    }
+
     public static void InitConifg(Page page)
     {
         string urlPath = page.Request.Url.AbsoluteUri;
@@ -70,6 +104,40 @@ public class WeChat
         }        
     }
 
+    /// <summary>
+    /// 获取全局Access_Token
+    /// </summary>
+    /// <param name="c"></param>
+    /// <returns></returns>
+
+    public static string GetAccessToken(HttpContext _c)
+    {
+        string APPID = com.seascape.tools.BasicTool.GetConfigPara("appid");
+        string SECRET = com.seascape.tools.BasicTool.GetConfigPara("secret");
+        string Access_Token = "";
+        bool isFail = string.IsNullOrEmpty(_c.Request["isFail"]) ? true : true;
+        if (isFail || string.IsNullOrEmpty(_c.Cache["Global_Access_Token"].ToString()))
+        {
+            com.seascape.wechat.AccessToken accessToken = new com.seascape.wechat.Common(APPID, SECRET).GetAccessToken();
+            _c.Cache.Add("Global_Access_Token", accessToken.token + "^" + accessToken.expirestime.Ticks, null, accessToken.expirestime, TimeSpan.Zero, System.Web.Caching.CacheItemPriority.Normal, null);
+            Access_Token = accessToken.token;
+        }
+        else
+        {
+            string[] tokenp = _c.Cache["Global_Access_Token"].ToString().Split('^');
+            long expticket = Convert.ToInt64(tokenp[1]);
+            if (expticket < DateTime.Now.Ticks)
+            {
+                _c.Cache["Global_Access_Token"] = "";
+                Access_Token = GetAccessToken(_c);
+            }
+            else {
+                Access_Token = tokenp[0];
+            }
+        }
+        return Access_Token;
+    }
+
     public static void InitCard(Page page)
     {
         string strCardConfig = BasicTool.webRequest(BASE_URL + "/service/app.ashx?fn=7");
@@ -94,5 +162,21 @@ public class WeChat
         {
             page.Response.Redirect("uc.html");
         }
+    }
+
+    /// <summary>
+    /// 输入流转字符串
+    /// </summary>
+    /// <param name="c"></param>
+    /// <returns></returns>
+    public string ConvertStream(HttpContext c)
+    {
+        System.IO.Stream sm = c.Request.InputStream;//获取post数据
+        int len = (int)sm.Length;//post数据的长度
+        byte[] inputByts = new byte[len];//存储post数据
+        sm.Read(inputByts, 0, len);//将post数据写入数组
+        sm.Close();//关闭流
+        string data = System.Text.Encoding.GetEncoding("utf-8").GetString(inputByts);//转换为unicode字符串  
+        return data;
     }
 }

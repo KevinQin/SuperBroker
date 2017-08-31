@@ -61,10 +61,16 @@ namespace com.superbroker.data
                     c.Name = r["Name"].ToString();
                     c.Mobile = r["Mobile"].ToString();
                     c.AddOn = r["AddOn"].ToDateTime();
-                    c.Area = r["area"].ToString();
+                    c.Province = r["Province"].ToString();
+                    c.Country = r["Country"].ToString();
+                    c.City = r["city"].ToString();
+                    c.Source = r["Source"].ToString();
+                    c.QrCode = r["QrCode"].ToInt();
+                    c.IsFllow = r["IsFllow"].ToInt16() == 1;
                     c.Gender = r["Gender"].ToInt16();
                     c.NickName = r["NickName"].ToString();
                     c.OpenId = r["OpenId"].ToString();
+                    c.UnionId = r["UnionId"].ToString();
                     c.PhotoUrl = r["PhotoUrl"].ToString();
                     c.Memo = r["Memo"].ToString();
                 }
@@ -86,10 +92,16 @@ namespace com.superbroker.data
                     c.Name = r["Name"].ToString();
                     c.Mobile = r["Mobile"].ToString();
                     c.AddOn = r["AddOn"].ToDateTime();
-                    c.Area = r["area"].ToString();
+                    c.Province = r["Province"].ToString();
+                    c.Country = r["Country"].ToString();
+                    c.Source = r["Source"].ToString();
+                    c.QrCode = r["QrCode"].ToInt();
+                    c.IsFllow = r["IsFllow"].ToInt16() == 1;
+                    c.City = r["city"].ToString();
                     c.Gender = r["Gender"].ToInt16();                  
                     c.NickName = r["NickName"].ToString();
                     c.OpenId = r["OpenId"].ToString();
+                    c.UnionId = r["UnionId"].ToString();
                     c.PhotoUrl = r["PhotoUrl"].ToString();
                     c.Memo = r["Memo"].ToString();
                 }
@@ -124,10 +136,16 @@ namespace com.superbroker.data
                     c.Name = r["Name"].ToString();
                     c.Mobile = r["Mobile"].ToString();
                     c.AddOn = r["AddOn"].ToDateTime();
-                    c.Area = r["area"].ToString();
+                    c.Province = r["Province"].ToString();
+                    c.Source = r["Source"].ToString();
+                    c.QrCode = r["QrCode"].ToInt();
+                    c.IsFllow = r["IsFllow"].ToInt16() == 1;
+                    c.Country = r["Country"].ToString();
+                    c.City = r["city"].ToString();
                     c.Gender = r["Gender"].ToInt16();
                     c.NickName = r["NickName"].ToString();
                     c.OpenId = r["OpenId"].ToString();
+                    c.UnionId = r["UnionId"].ToString();
                     c.PhotoUrl = r["PhotoUrl"].ToString();
                     c.Memo = r["Memo"].ToString();
                     list.Add(c);

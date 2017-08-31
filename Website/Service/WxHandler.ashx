@@ -22,6 +22,7 @@ public class WxHandler : IHttpHandler {
     //接收参数
     string verifySig="", verifyMsgSig = "", verifyTimeStamp = "", verifyNonce = "", verifyEchoStr = "",verifyEncryptType="";
     string source = "0";
+    int QRCode = 0;
     static string logFile = "";
     //默认代金券信息
     static int voucherFee = 120;
@@ -100,26 +101,106 @@ public class WxHandler : IHttpHandler {
             else if (msg.MsgType == MsgType.EVENT)
             {
                 EventMessage emsg = (EventMessage)msg;
+                string openId = emsg.FromUserName;
                 if (emsg.Event == EVENT.SUBSCRIBE)
                 {
+                    try
+                    {
+                        QRCode = Convert.ToInt32(((SubEventMessage)emsg).EventKey);
+                    }
+                    catch { QRCode = 0; }
+                    CheckMember(openId);
                     ResponseWrite(msg.ResText("感谢您的关注"));
                 }
                 else if (emsg.Event == EVENT.SCAN)
                 {
+                    try
+                    {
+                        QRCode = Convert.ToInt32(((ScanEventMessage)emsg).EventKey);
+                    }
+                    catch { QRCode = 0; }
+                    CheckMember(openId);
                     ResponseWrite(msg.ResText("欢迎再次回来"));
+                }
+                else if (emsg.Event == EVENT.UNSUBSCRIBE) {
+                    MemberUnFllow(openId);
                 }
             }
         }
         catch (Exception ex) {
-                Log.F(ex.Message,c);
+            Log.F(ex.Message,c);
         }
-        /*下发代金券提醒
-        if (VoucherContent.Length > 0)
+    }
+
+    /// <summary>
+    /// 不再关注
+    /// </summary>
+    /// <param name="openId"></param>
+    /// <returns></returns>
+    public bool MemberUnFllow(string openId) {
+        bool isSuccess = false;
+        Log.F("UnFllow Member:" + openId,_c);
+        if (!string.IsNullOrEmpty(openId))
         {
-            string url = "https://api.weixin.qq.com/cgi-bin/message/custom/send?access_token=" + Get_Access_Token();
-            string content = "{\"touser\":\"" + FromUserName + "\",\"msgtype\":\"text\",\"text\":{\"content\":\"" + VoucherContent + "\"}}";
-            Log.F(new WxTool().webRequest(url,content));
-        }*/
+            Member m = new DMember().Get(openId);
+            if (m != null) {
+                m.IsFllow = false;
+                isSuccess= new DMember().Update(m);
+            }
+            Log.F("UnFllow Member:" + isSuccess,_c);
+        }
+        return isSuccess;
+    }
+
+    /// <summary>
+    /// 检测用户是否已存储至数据库，并自动存储
+    /// </summary>
+    /// <param name="openId"></param>
+    /// <returns></returns>
+    public bool CheckMember(string openId) {
+        bool IsNewMember = false;
+        Log.F("Check Member:" + openId,_c);
+        if (!string.IsNullOrEmpty(openId)) {
+            Member m= new DMember().Get(openId);
+            if (m == null)
+            {
+                Log.F("Check Member 01:new member", _c);
+                IsNewMember = true;
+                string result = "";
+                UserInfo ui = UserInfo.getUserInfoByGlobal(WeChat.GetAccessToken(_c), openId, out result);
+                Log.F("[" + openId + "]GetUserInfoByGlobal=" + result, _c);
+                if (ui != null && !string.IsNullOrEmpty(ui.nickname))
+                {
+                    Member member = new Member()
+                    {
+                        AddOn = DateTime.Now,
+                        Country = ui.country,
+                        Province = ui.province,
+                        City = ui.city,
+                        Gender = ui.sex,
+                        Memo = "",
+                        Mobile = "",
+                        Name = "",
+                        NickName = ui.nickname,
+                        OpenId = openId,
+                        UnionId = "",
+                        IsFllow = true,
+                        QrCode = QRCode,
+                        Source = source,
+                        PhotoUrl = ui.headimgurl
+                    };
+                    int Id = 0;
+                    bool isSuccess= new DMember().Add(out Id, member);
+                    Log.F("Check Member-Add Member:uid["+ isSuccess +":"+ Id +"]", _c);
+                }
+            }
+            else {
+                m.IsFllow = true;
+                new DMember().Update(m);
+                Log.F("Check Member 01:old member",_c);
+            }
+        }
+        return IsNewMember;
     }
 
     public bool ValidUrl()
@@ -192,28 +273,7 @@ public class WxHandler : IHttpHandler {
             new DTemplateMsg().Add(out id, tmp);
         }
         catch { }
-        new TMessage().Send_TemplateMsg(t, GetAccessToken());
-    }
-
-    /// <summary>
-    /// 获取全局Access_Token
-    /// </summary>
-    /// <param name="c"></param>
-    /// <returns></returns>
-    public string GetAccessToken()
-    {
-        string Access_Token = "";
-        bool isFail = string.IsNullOrEmpty(_c.Request["isFail"]) ? true : true;
-        if (isFail || string.IsNullOrEmpty(_c.Cache["Global_Access_Token"].ToString()))
-        {
-            AccessToken accessToken = new Common(APPID, SECRET).GetAccessToken();
-            _c.Cache.Add("Global_Access_Token", accessToken.token, null, accessToken.expirestime , TimeSpan.Zero, System.Web.Caching.CacheItemPriority.Normal, null);
-        }
-        else
-        {
-            Access_Token = _c.Cache["Global_Access_Token"].ToString();
-        }
-        return Access_Token;
+        new TMessage().Send_TemplateMsg(t, WeChat.GetAccessToken(c));
     }
 
     public bool IsReusable

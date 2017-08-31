@@ -43,7 +43,7 @@ namespace com.seascape.wechat
                 JsonData j = JsonMapper.ToObject(result);
                 string accessToken = j["access_token"].ToString();
                 int expirestime = Convert.ToInt32(j["expires_in"].ToString());
-                at = new AccessToken { expirestime = DateTime.Now.AddSeconds(expirestime), token = accessToken };
+                at = new AccessToken { expirestime = DateTime.Now.AddSeconds(expirestime-1000), token = accessToken };
             }
             catch (Exception e)
             {     
