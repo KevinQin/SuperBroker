@@ -14,6 +14,7 @@ namespace com.superbroker.data
         public bool Add(out int Id, Broker t)
         {
             SqlObject sql = new SqlObject(SqlObjectType.Insert, t, DB_TYPE);
+            t.Password = PasswordEncode(t.Password);
             Id = 0;
             if (sql.AddAllField())
             {
@@ -96,7 +97,6 @@ namespace com.superbroker.data
                         Memo = r["Memo"].ToString(),
                         Mobile = r["Mobile"].ToString(),
                         Name = r["Name"].ToString(),
-                        NickName = r["NickName"].ToString(),
                         OpenId = r["OpenId"].ToString(),
                         Password = r["Password"].ToString(),
                         State = r["State"].ToInt16(),
@@ -110,6 +110,40 @@ namespace com.superbroker.data
                 }
             }
             return list;
+        }
+
+        public Broker Login(string openid, string account, string pwd,out int ErrCode) {
+            Broker broker = Get(0,openid);
+            ErrCode = 0;
+            if (broker != null)
+            {
+                if (broker.Mobile == account || broker.WorkNo == account)
+                {
+                    if (broker.State == 1)
+                    {
+
+                        if (broker.Password == PasswordEncode(pwd))
+                        {
+                            ErrCode = 1;
+                        }
+                        else
+                        {
+                            ErrCode = 11;
+                        }
+                    }
+                    else {
+                        ErrCode = broker.State;
+                    }
+                }
+                else
+                {
+                    ErrCode = 12;
+                }
+            }
+            else {
+                ErrCode = 13;
+            }
+            return broker;
         }
 
         public Broker Get(int id=0, string openid="", string workno=null) {
@@ -139,7 +173,6 @@ namespace com.superbroker.data
                         Memo=r["Memo"].ToString(), 
                         Mobile=r["Mobile"].ToString(),
                         Name=r["Name"].ToString(),
-                        NickName=r["NickName"].ToString(),
                         OpenId=r["OpenId"].ToString(),
                         Password=r["Password"].ToString(),
                         State=r["State"].ToInt16(),

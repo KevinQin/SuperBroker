@@ -40,11 +40,12 @@ public class AppHandler:IHttpHandler,IRequiresSessionState {
     static Response response;
     HttpContext _c;
     static Admin admin = null;
+    private DateTime DEF_DATE = new DateTime(2000, 1, 1);
 
     public void ProcessRequest(HttpContext c) {
         response = new Response();
         _c = c;
-        int F = string.IsNullOrEmpty(c.Request["fn"]) ? 0 : Convert.ToInt16(c.Request["fn"]);
+        int F = c.xRequest("fn").ToInt16();
         c.Response.ContentType = "text/plain";
         c.Response.Write(GetResult(F, c));
     }
@@ -88,8 +89,11 @@ public class AppHandler:IHttpHandler,IRequiresSessionState {
                 case 9:
                     Result = GetLocation(c);//获取地理位置
                     break;
-                case 100:
-                    Result = "";
+                case 101:
+                    Result = RegisterBroker(c);//注册经纪人
+                    break;
+                case 102://登录
+                    Result = BrokerLogin(c);//经纪人登录
                     break;
                 case 999:
                     Result = Test(c);
@@ -104,6 +108,51 @@ public class AppHandler:IHttpHandler,IRequiresSessionState {
         }
         Log.D("[A]Result-" + f + ":" + Result.ToString(), c);
         return ReplaceTableName(Result);
+    }
+
+    private string BrokerLogin(HttpContext c) {
+        string account = c.xRequest("account").ToString();
+        string openid = c.Request["openid"].ToString();
+        string pwd = c.Request["pwd"].ToString();
+        int ErrCode = 0;
+        Broker broker= new DBroker().Login(openid, account, pwd, out ErrCode);
+        if (ErrCode == 1)
+        {
+            return response.Success(broker);
+        }
+        else {
+            return response.Fail("login fail", ErrCode*-1);
+        }
+    }
+
+    private string RegisterBroker(HttpContext c) {
+        string name = c.xRequest("name").ToString();
+        string mobile = c.xRequest("mobile").ToString();
+        string pwd = c.Request["pwd"].ToString();
+        string openid = c.Request["openid"].ToString();
+        Member member = new DMember().Get(openid);
+        Broker broker = new Broker() {
+            AccountName="", AddOn=DateTime.Now, Address="",
+            Area=member.Country+","+member.Province+","+member.City, AvatarMediaId=member.PhotoUrl,
+            BankCardNo="", BankInfo="", CheckInfo="", CheckOn=DEF_DATE, CheckWorkNo="", Company="",
+            FeePeer=0, Gender=member.Gender, Memo="", Mobile=mobile, Name=name,
+            OpenId=openid, Password=pwd, State= 0, Tel="", Trade="", UnionId="", UptimeOn=DEF_DATE, WorkNo=""
+        };
+        int Id = 0;
+        if (new DBroker().Add(out Id, broker))
+        {
+            if (Id > 0)
+            {
+                return response.Success("注册成功");
+            }
+            else
+            {
+                return response.Fail("注册失败",-1);
+            }
+        }
+        else {
+            return response.Fail("注册失败",-2);
+        }
     }
 
     public string Test(HttpContext c)
@@ -137,39 +186,7 @@ public class AppHandler:IHttpHandler,IRequiresSessionState {
     public string GetLocation(HttpContext c) {
         double latitude = Convert.ToDouble(c.Request["latitude"]);
         double longitude = Convert.ToDouble(c.Request["longitude"]);
-        return GetFormattedAddress(latitude, longitude);
-    }
-
-    private string GetFormattedAddress(double latitude, double longitude)
-    {
-        try
-        {
-            string url = "http://maps.google.cn/maps/api/geocode/json?latlng={0},{1}&sensor=true&language=zh-CN";
-            string json = BasicTool.webRequest(string.Format(url, latitude, longitude));
-            LitJson.JsonData allData = LitJson.JsonMapper.ToObject(json);
-            LitJson.JsonData resultData = allData["results"];
-            LitJson.JsonData firstData = resultData[0];
-            string formatAddress = firstData["formatted_address"].ToString();
-            formatAddress = formatAddress.Split(' ')[0].Replace("中国", "").Trim();
-            int len = firstData["address_components"].Count;
-            //string Address = firstData["address_components"][0]["long_name"].ToString();
-            string prov = firstData["address_components"][len-3]["long_name"].ToString();
-            string city = firstData["address_components"][len-4]["long_name"].ToString();
-            string dist = firstData["address_components"][len-5]["long_name"].ToString();
-            string Address = formatAddress.Replace(prov, "").Replace(city, "").Replace(dist, "");
-            if (formatAddress.ToUpper().IndexOf("unnamed") > -1) {
-                Address = "";
-                if (city != "") { Address += city; }
-                if (dist != "") { Address += dist; }
-                if (Address == "") { Address = prov; }
-            }
-            object obj = new { Full = formatAddress, A=Address, P = prov, C = city, D = dist };
-            return response.Success(obj);
-        }
-        catch (Exception ex)
-        {
-            return response.Fail("can not get location");
-        }
+        return Util.GetFormattedAddress(latitude, longitude);
     }
 
     /// <summary>
@@ -190,10 +207,7 @@ public class AppHandler:IHttpHandler,IRequiresSessionState {
             Log.D("openid:" + at.openid, _c);
             //------------------写用户------------------
             Member u = new DMember().Get(at.openid);
-            if (u != null)
-            {
-            }
-            else
+            if (u == null)
             {
                 u = new Member();
                 string r = "";
@@ -221,7 +235,6 @@ public class AppHandler:IHttpHandler,IRequiresSessionState {
                     u.Id = id;
                 }
             }
-            //------------------------------------------
             return response.Success(at.openid);
         }
         else
@@ -319,7 +332,7 @@ public class AppHandler:IHttpHandler,IRequiresSessionState {
             FilePath+= uid + ".jpg";
             int SceneID = uid;
             string Result = new Common(APPID, SECRET).GetQR_Code(FilePath, SceneID);
-            Log.D("推荐有礼分享成功["+ uid +"]", _c);
+            Log.D("生成二维码成功["+ uid +"]", _c);
             return response.Success("success");
         }
         return response.Fail("error", 1);
@@ -399,40 +412,40 @@ public class AppHandler:IHttpHandler,IRequiresSessionState {
             sb.Append("{");
             sb.Append("    \"button\": [");
             sb.Append("        {");
-            sb.Append("            \"type\": \"view\", ");
-            sb.Append("            \"name\": \"加入\", ");
-            sb.Append("            \"url\": \"https://open.weixin.qq.com/connect/oauth2/authorize?appid="+ APPID +"&redirect_uri=http%3a%2f%2f"+ _BASE_URL +"%2fapp%2fregister.aspx&response_type=code&scope=snsapi_userinfo&state=i#wechat_redirect\"");
-            sb.Append("        }, ");
-            sb.Append("        {");
-            sb.Append("            \"type\": \"view\", ");
-            sb.Append("            \"name\": \"备案\", ");
-            sb.Append("            \"url\": \"https://open.weixin.qq.com/connect/oauth2/authorize?appid="+ APPID +"&redirect_uri=http%3a%2f%2f"+ _BASE_URL +"%2fapp%2freport.aspx&response_type=code&scope=snsapi_userinfo&state=i#wechat_redirect\"");
-            sb.Append("        }, ");
-            sb.Append("        {");
-            sb.Append("           \"name\": \"我的\", ");
+            sb.Append("           \"name\": \"经纪人\", ");
             sb.Append("            \"sub_button\": [");
             sb.Append("                {");
             sb.Append("                    \"type\": \"view\", ");
-            sb.Append("                    \"name\": \"个人中心\", ");
-            sb.Append("                    \"url\": \"https://open.weixin.qq.com/connect/oauth2/authorize?appid="+ APPID +"&redirect_uri=http%3a%2f%2f"+ _BASE_URL +"%2fapp%2fuc.aspx&response_type=code&scope=snsapi_userinfo&state=i#wechat_redirect\"");
+            sb.Append("                    \"name\": \"我要加入\", ");
+            sb.Append("                    \"url\": \"https://open.weixin.qq.com/connect/oauth2/authorize?appid="+ APPID +"&redirect_uri=http%3a%2f%2f"+ _BASE_URL +"%2fapp%2fBroker%2fRegister.aspx&response_type=code&scope=snsapi_userinfo&state=i#wechat_redirect\"");
             sb.Append("                }, ");
             sb.Append("                {");
             sb.Append("                    \"type\": \"view\", ");
-            sb.Append("                    \"name\": \"我的备案\", ");
-            sb.Append("                    \"url\": \"https://open.weixin.qq.com/connect/oauth2/authorize?appid="+ APPID +"&redirect_uri=http%3a%2f%2f"+ _BASE_URL +"%2fapp%2freport.aspx&response_type=code&scope=snsapi_userinfo&state=i#wechat_redirect\"");
+            sb.Append("                    \"name\": \"进入平台\", ");
+            sb.Append("                    \"url\": \"https://open.weixin.qq.com/connect/oauth2/authorize?appid="+ APPID +"&redirect_uri=http%3a%2f%2f"+ _BASE_URL +"%2fapp%2fBroker%2fLogin.aspx&response_type=code&scope=snsapi_userinfo&state=i#wechat_redirect\"");
+            sb.Append("                } ");
+            sb.Append("            ]");
+            sb.Append("        },");
+            sb.Append("        {");
+            sb.Append("            \"name\": \"案场\", ");
+            sb.Append("            \"sub_button\": [");
+            sb.Append("                {");
+            sb.Append("                    \"type\": \"view\", ");
+            sb.Append("                    \"name\": \"管理平台\", ");
+            sb.Append("                    \"url\": \"https://open.weixin.qq.com/connect/oauth2/authorize?appid="+ APPID +"&redirect_uri=http%3a%2f%2f"+ _BASE_URL +"%2fapp%2fWorker%2fLogin.aspx&response_type=code&scope=snsapi_userinfo&state=i#wechat_redirect\"");
             sb.Append("                }, ");
             sb.Append("                {");
             sb.Append("                    \"type\": \"view\", ");
-            sb.Append("                    \"name\": \"我的佣金\", ");
-            sb.Append("                    \"url\": \"https://open.weixin.qq.com/connect/oauth2/authorize?appid="+ APPID +"&redirect_uri=http%3a%2f%2f"+ _BASE_URL +"%2fapp%2ffee.aspx&response_type=code&scope=snsapi_userinfo&state=i#wechat_redirect\"");
-            sb.Append("                }, ");
-            sb.Append("                {");
-            sb.Append("                    \"type\": \"view\", ");
-            sb.Append("                    \"name\": \"消息中心\", ");
-            sb.Append("                     \"url\": \"https://open.weixin.qq.com/connect/oauth2/authorize?appid="+ APPID +"&redirect_uri=http%3a%2f%2f"+ _BASE_URL +"%2fapp%2fnotify.aspx&response_type=code&scope=snsapi_userinfo&state=i#wechat_redirect\"");
+            sb.Append("                    \"name\": \"楼盘推荐\", ");
+            sb.Append("                    \"url\": \"https://open.weixin.qq.com/connect/oauth2/authorize?appid="+ APPID +"&redirect_uri=http%3a%2f%2f"+ _BASE_URL +"%2fapp%2fBuilder%2flist.aspx&response_type=code&scope=snsapi_userinfo&state=i#wechat_redirect\"");
             sb.Append("                }");
             sb.Append("            ]");
-            sb.Append("        }");
+            sb.Append("        }, ");
+            sb.Append("        {");
+            sb.Append("            \"type\": \"view\", ");
+            sb.Append("            \"name\": \"关于我们\", ");
+            sb.Append("            \"url\": \"https://open.weixin.qq.com/connect/oauth2/authorize?appid="+ APPID +"&redirect_uri=http%3a%2f%2f"+ _BASE_URL +"%2fapp%2fAbout.html&response_type=code&scope=snsapi_userinfo&state=i#wechat_redirect\"");
+            sb.Append("        }, ");
             sb.Append("    ]");
             sb.Append("}");
             string ACCESS_TOKEN = WeChat.GetAccessToken(c);

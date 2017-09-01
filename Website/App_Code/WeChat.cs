@@ -18,40 +18,7 @@ public class WeChat
 		// TODO: 在此处添加构造函数逻辑
 		//
 	}
-
-    /// <summary>
-    /// 得到用户IP
-    /// </summary>
-    /// <param name="r">Request对象</param>
-    /// <returns></returns>
-    public static string GetIp(HttpRequest r)
-    {
-        string Ip = string.Empty;
-        if (r.ServerVariables["HTTP_VIA"] != null)
-        {
-            if (r.ServerVariables["HTTP_X_FORWARDED_FOR"] == null)
-            {
-                if (r.ServerVariables["HTTP_CLIENT_IP"] != null)
-                    Ip = r.ServerVariables["HTTP_CLIENT_IP"].ToString();
-                else
-                    if (r.ServerVariables["REMOTE_ADDR"] != null)
-                    Ip = r.ServerVariables["REMOTE_ADDR"].ToString();
-                else
-                    Ip = "0.0.0.0";
-            }
-            else
-                Ip = r.ServerVariables["HTTP_X_FORWARDED_FOR"].ToString();
-        }
-        else if (r.ServerVariables["REMOTE_ADDR"] != null)
-        {
-            Ip = r.ServerVariables["REMOTE_ADDR"].ToString();
-        }
-        else
-        {
-            Ip = "0.0.0.0";
-        }
-        return Ip;
-    }
+        
 
     public static void InitConifg(Page page)
     {

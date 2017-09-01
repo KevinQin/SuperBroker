@@ -31,10 +31,6 @@ namespace com.superbroker.model
         /// </summary>
         public string Name { get; set; }
         /// <summary>
-        /// 微信昵称
-        /// </summary>
-        public string NickName { get; set; }
-        /// <summary>
         /// 电话
         /// </summary>
         public string Mobile { get; set; }
