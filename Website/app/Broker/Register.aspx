@@ -25,25 +25,25 @@
                     <div class="weui-cell">
                         <div class="weui-cell__hd"><label class="weui-label"><i class="iconfont icon-jingjiren"></i></label></div>
                         <div class="weui-cell__bd">
-                            <input class="weui-input" required type="text" id="txtName" placeholder="请填写姓名"/>
+                            <input class="weui-input" required="required" type="text" id="txtName" placeholder="请填写姓名"/>
                         </div>
                     </div>
                     <div class="weui-cell">
                         <div class="weui-cell__hd"><label class="weui-label"><i class="iconfont icon-iconfontshouji"></i></label></div>
                         <div class="weui-cell__bd">
-                            <input class="weui-input" type="text" id="txtMobile" required pattern="[0-9]{11}" placeholder="请输入手机号码"/>
+                            <input class="weui-input" type="text" id="txtMobile" required="required" pattern="[0-9]{11}" placeholder="请输入手机号码"/>
                         </div>
                     </div> 
                     <div class="weui-cell">
                         <div class="weui-cell__hd"><label class="weui-label"><i class="iconfont icon-kouling"></i></label></div>
                         <div class="weui-cell__bd">
-                            <input class="weui-input" type="password" required pattern="\w{6,16}" id="txtPwd" placeholder="请填写登录密码,6-16位字符"/>
+                            <input class="weui-input" type="password" required="required" pattern="\w{6,16}" id="txtPwd" placeholder="请填写登录密码,6-16位字符"/>
                         </div>              
                     </div>
                     <div class="weui-cell">
                         <div class="weui-cell__hd"><label class="weui-label"><i class="iconfont icon-anquanzhongxin"></i></label></div>
                         <div class="weui-cell__bd">
-                            <input class="weui-input" type="password" id="txtRePwd" required pattern="\w{6,16}" placeholder="请再次填写登录密码"/>
+                            <input class="weui-input" type="password" id="txtRePwd" required="required" pattern="\w{6,16}" placeholder="请再次填写登录密码"/>
                         </div>              
                     </div>
                 </div>
@@ -62,7 +62,6 @@
 <script src="//r.edmp.cc/jquerycookie/jquery.cookie.js"></script>
 <script src="//res.wx.qq.com/open/js/jweixin-1.2.0.js"></script>
 <script src="//r.edmp.cc/weui/weui.min.js"></script>
-<script src="//r.edmp.cc/swiper/swiper-3.4.0.jquery.min.js"></script>
 <script src="//r.edmp.cc/seascape/dateclass.js"></script>
 <script src="//r.edmp.cc/seascape/common.js"></script>
 <script src="../script/broker.js"></script>

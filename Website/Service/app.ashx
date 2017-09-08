@@ -92,8 +92,26 @@ public class AppHandler:IHttpHandler,IRequiresSessionState {
                 case 101:
                     Result = RegisterBroker(c);//注册经纪人
                     break;
-                case 102://登录
+                case 102:
                     Result = BrokerLogin(c);//经纪人登录
+                    break;
+                case 103:
+                    Result = GetBuilderList(c);//得到楼盘列表
+                    break;
+                case 104:
+                    Result = GetBuilder(c);//载入楼盘详细信息
+                    break;
+                case 105:
+                    Result = GetRoomList(c);//得到户型列表
+                    break;
+                case 106:
+                    Result = DoReport(c);//备案
+                    break;
+                case 107:
+                    Result = GetPreReportInfo(c);//获取信息
+                    break;
+                case 108:
+                    Result = GetReportList(c);//获取报备列表
                     break;
                 case 999:
                     Result = Test(c);
@@ -108,6 +126,175 @@ public class AppHandler:IHttpHandler,IRequiresSessionState {
         }
         Log.D("[A]Result-" + f + ":" + Result.ToString(), c);
         return ReplaceTableName(Result);
+    }
+
+    private string GetReportList(HttpContext c) {
+        string openid = c.Request["openid"].ToString();
+        Broker broker = new DBroker().Get(0, openid);
+        if (broker == null) {
+            return response.Fail("无权获取当前备案信息[-2]");
+        }
+        string BrokerNo = broker.WorkNo;
+        int state = c.xRequest("state").ToInt16();
+        int pageno = c.xRequest("pageno").ToInt16();
+        int pagecount = 0;
+        if (pageno < 1) { pageno = 1; }
+        List<ReportingSimpleView> list = new DReporting().Get(BrokerNo, state, pageno, out pagecount);
+        return response.Success(list, new { PageCount = pagecount, PageNo = pageno });
+    }
+
+    private string GetPreReportInfo(HttpContext c) {
+        string builderNo = c.xRequest("bno");
+        string openid = c.xRequest("openid");
+        Broker broker = new DBroker().Get(0, openid);
+        if (broker == null) {
+            return response.Fail("search broker Error", -3);
+        }
+
+
+        Builder builder = new DBuilder().Get(0, builderNo);
+        if (builder == null) {
+            return response.Fail("search builder Error", -4);
+        }
+
+        return response.Success(new {BuilderName=builder.Name, BrokerName= broker.Name, BrokerWorkNo=broker.WorkNo, Begin=DateTime.Now.ToString("yyyy年M月d日 HH点"),End=DateTime.Now.AddDays(7.0).ToString("yyyy年M月d日 HH点")});
+    }
+
+    private string DoReport(HttpContext c) {
+        string name = c.xRequest("name");
+        string mobile = c.xRequest("mobile");
+        string builderNo = c.xRequest("bno");
+        string openid = c.xRequest("openid");
+        string memo = c.xRequest("memo");
+        int gender = c.xRequest("gender").ToInt16();
+        int pageOut = 0;
+        List<Custom> list = new DCustom().Get("", name, mobile, 1, DEF_DATE, DEF_DATE, out pageOut);
+        string customNo = "";
+        if (list!=null && list.Count > 0)
+        {
+            customNo = list[0].CustomNo;
+            list.Clear();
+            list = null;
+        }
+        else {
+            Custom custom = new Custom()
+            {
+                AddOn = DateTime.Now,
+                CustomNo = GetOrderNo(),
+                Gender = gender,
+                Memo = "",
+                Mobile = mobile,
+                Name = name,
+                OpenId = "",
+                Tel = "",
+                UnionId = ""
+            };
+            int CustomId = 0;
+            bool addCustom= new DCustom().Add(out CustomId, custom);
+            addCustom = CustomId > 1;
+            if (addCustom) {
+                customNo = custom.CustomNo;
+            }
+        }
+        if (string.IsNullOrEmpty(customNo)) { return response.Fail("备案失败，[-2]",-2); }
+
+        Broker broker = new DBroker().Get(0, openid);
+        if (broker == null) {
+            return response.Fail("备案失败，无效的经纪人", -3);
+        }
+        string BrokerNo = broker.WorkNo;
+
+        Builder builder = new DBuilder().Get(0, builderNo);
+        if (builder == null) {
+            return response.Fail("备案失败，无效的楼盘", -4);
+        }
+        int fee = builder.FeePeer;
+        int feeType = builder.FeeType;
+        //是否已备案查询
+        List<Reporting> _list = new DReporting().Get( 1, out pageOut,name, mobile, builder.Name, "", "", DEF_DATE, DEF_DATE, 99);
+        int state = 1;
+        if (_list!=null && _list.Count > 0)
+        {
+            state = 0;
+            _list.Clear();
+            _list = null;
+        }
+
+        Reporting report = new Reporting() {
+            AddOn=DateTime.Now, ArriveOn=DEF_DATE, BackFeeOn=DEF_DATE, BrokerNo=BrokerNo, BuilderNo=builderNo, CustomNo=customNo, DebitedOn=DEF_DATE,
+            DisableOn=DEF_DATE, DownPaymentOn=DEF_DATE, FailOn=DEF_DATE, Fee=fee, FeeType=feeType, HouseNo="", PayFeeOn=DEF_DATE, ProtectedOn=DateTime.Now.AddDays(7),
+            ReportNo=GetOrderNo(), ReportOn=DateTime.Now, ReturnFeeOn=DEF_DATE, RoomNo="", SignedOn=DEF_DATE, State=state, TotalPrice=0
+        };
+        int id = 0;
+        if ( new DReporting().Add(out id, report))
+        {
+            if (state == 1)
+            {
+                if (id > 0)
+                {
+                    //增加一条日志
+                    ReportLog log = new ReportLog() {
+                        AddOn=DateTime.Now, Memo="成功报备", ReportNo=report.ReportNo, State=state, WorkNo= BrokerNo
+                    };
+                    new DReportLog().Add(out id, log);
+                    return response.Success(report.ReportNo);
+                }
+                else {
+                    return response.Fail("备案失败，请重试[-6]",-6);
+                }
+            }
+            else {
+                ReportLog log = new ReportLog() {
+                    AddOn=DateTime.Now, Memo="报备失败", ReportNo=report.ReportNo, State=state, WorkNo= BrokerNo
+                };
+                return response.Fail("备案失败，该客户已报备",-7);
+            }
+
+        }
+        else {
+            return response.Fail("备案失败，请重试[-5]",-5);
+        }
+    }
+
+    private string GetRoomList(HttpContext c) {
+        string bno = c.xRequest("bno");
+        int PageCount = 0;
+        List<Room> list = new DRoom().Get(out PageCount, 1, bno, "", DEF_DATE, DEF_DATE);
+        if (list == null)
+        {
+            return response.Fail("load room error");
+        }
+        else {
+            return response.Success(list);
+        }
+    }
+
+    private string GetBuilder(HttpContext c)
+    {
+        string bno = c.xRequest("bno");
+        Builder builder = new DBuilder().Get(0, bno);
+        if (builder != null)
+        {
+            return response.Success(builder);
+        }
+        else {
+            return response.Fail("Load Detail Info Error");
+        }
+    }
+
+    private string GetBuilderList(HttpContext c) {
+        int PageNo = c.xRequest("page").ToInt16();
+        string key = c.xRequest("key");
+        string location = c.xRequest("location");
+        int pageOut = 0;
+        List<SimpleBuilderView> list = new DBuilder().Get(out pageOut, key, key, location, PageNo);
+        if (list != null)
+        {
+            return response.Success(list, new { PageCount = pageOut,PageNo=PageNo });
+        }
+        else {
+            return response.Fail("Get Info Error");
+        }
     }
 
     private string BrokerLogin(HttpContext c) {
@@ -427,19 +614,9 @@ public class AppHandler:IHttpHandler,IRequiresSessionState {
             sb.Append("            ]");
             sb.Append("        },");
             sb.Append("        {");
-            sb.Append("            \"name\": \"案场\", ");
-            sb.Append("            \"sub_button\": [");
-            sb.Append("                {");
-            sb.Append("                    \"type\": \"view\", ");
-            sb.Append("                    \"name\": \"管理平台\", ");
-            sb.Append("                    \"url\": \"https://open.weixin.qq.com/connect/oauth2/authorize?appid="+ APPID +"&redirect_uri=http%3a%2f%2f"+ _BASE_URL +"%2fapp%2fWorker%2fLogin.aspx&response_type=code&scope=snsapi_userinfo&state=i#wechat_redirect\"");
-            sb.Append("                }, ");
-            sb.Append("                {");
-            sb.Append("                    \"type\": \"view\", ");
-            sb.Append("                    \"name\": \"楼盘推荐\", ");
-            sb.Append("                    \"url\": \"https://open.weixin.qq.com/connect/oauth2/authorize?appid="+ APPID +"&redirect_uri=http%3a%2f%2f"+ _BASE_URL +"%2fapp%2fBuilder%2flist.aspx&response_type=code&scope=snsapi_userinfo&state=i#wechat_redirect\"");
-            sb.Append("                }");
-            sb.Append("            ]");
+            sb.Append("            \"type\": \"view\", ");
+            sb.Append("            \"name\": \"楼盘介绍\", ");
+            sb.Append("            \"url\": \"https://open.weixin.qq.com/connect/oauth2/authorize?appid="+ APPID +"&redirect_uri=http%3a%2f%2f"+ _BASE_URL +"%2fapp%2fBuilder%2fList.aspx&response_type=code&scope=snsapi_userinfo&state=i#wechat_redirect\"");
             sb.Append("        }, ");
             sb.Append("        {");
             sb.Append("            \"type\": \"view\", ");

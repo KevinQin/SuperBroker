@@ -24,13 +24,13 @@
                     <div class="weui-cell">
                         <div class="weui-cell__hd"><label class="weui-label"><i class="iconfont icon-jingjiren1"></i></label></div>
                         <div class="weui-cell__bd">
-                            <input class="weui-input" type="number" id="txtAccount" required pattern="[0-9]{5,11}" placeholder="请填写经纪人账号或手机"/>
+                            <input class="weui-input" type="number" id="txtAccount" required="required" pattern="[0-9]{5,11}" placeholder="请填写经纪人账号或手机"/>
                         </div>
                     </div>                   
                     <div class="weui-cell">
                         <div class="weui-cell__hd"><label class="weui-label"><i class="iconfont icon-kouling"></i></label></div>
                         <div class="weui-cell__bd">
-                            <input class="weui-input" type="password" id="txtPwd" required pattern="\w{6,16}" placeholder="请填写经纪人密码"/>
+                            <input class="weui-input" type="password" id="txtPwd" required="required" pattern="\w{6,16}" placeholder="请填写经纪人密码"/>
                         </div>              
                     </div>
                 </div>
@@ -49,7 +49,6 @@
 <script src="//r.edmp.cc/jquerycookie/jquery.cookie.js"></script>
 <script src="//res.wx.qq.com/open/js/jweixin-1.2.0.js"></script>
 <script src="//r.edmp.cc/weui/weui.min.js"></script>
-<script src="//r.edmp.cc/swiper/swiper-3.4.0.jquery.min.js"></script>
 <script src="//r.edmp.cc/seascape/dateclass.js"></script>
 <script src="//r.edmp.cc/seascape/common.js"></script>
 <script src="../script/broker.js"></script>

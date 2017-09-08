@@ -4,6 +4,37 @@ using System.Text;
 
 namespace com.superbroker.model
 {
+    public class SimpleBuilderView {
+        /// <summary>
+        /// 楼盘编号
+        /// </summary>
+        public string BuilderNo { get; set; }
+        /// <summary>
+        /// 楼盘名称
+        /// </summary>
+        public string Name { get; set; }
+        /// <summary>
+        /// 口号
+        /// </summary>
+        public string Slogen { get; set; }
+        /// <summary>
+        /// 价格
+        /// </summary>
+        public int Price { get; set; }
+        /// <summary>
+        /// 市
+        /// </summary>
+        public string City { get; set; }
+        /// <summary>
+        /// 区
+        /// </summary>
+        public string District { get; set; }
+        /// <summary>
+        /// 头图
+        /// </summary>
+        public string HeadImg { get; set; }
+    }
+
     /// <summary>
     /// 楼盘
     /// </summary>
@@ -102,6 +133,10 @@ namespace com.superbroker.model
         /// 分佣类型 0按比例 1固定金额
         /// </summary>
         public int FeeType { get; set; }
+        /// <summary>
+        /// 标签
+        /// </summary>
+        public string Label { get; set; }
         /// <summary>
         /// 下架时间
         /// </summary>

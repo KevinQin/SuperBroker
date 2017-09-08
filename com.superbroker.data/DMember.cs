@@ -124,7 +124,7 @@ namespace com.superbroker.data
             if (!string.IsNullOrEmpty(mobile)) { where += " and mobile like '%" + mobile + "%' "; }
             if (aid >= 0) { where += " and aid=" + aid; }
             int recordCount = Convert.ToInt32(helper.GetOne(sql + where));
-            pageCount = pageCount / PAGE_SIZE + pageCount % PAGE_SIZE == 0 ? 0 : 1;
+            pageCount = pageCount / PAGE_SIZE + recordCount % PAGE_SIZE == 0 ? 0 : 1;
 
             sql = "select * from " +Member.TABLENAME + where + " order by id desc limit " + (pageNum - 1) * PAGE_SIZE + "," + PAGE_SIZE;
             using (DataTable dt = helper.GetDataTable(sql))

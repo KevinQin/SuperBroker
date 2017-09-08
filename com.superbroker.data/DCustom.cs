@@ -54,11 +54,11 @@ namespace com.superbroker.data
             string _sql = "select count(id) from " + Custom.TABLENAME + " where 1=1 ";
             if (!string.IsNullOrEmpty(CustomNo)) { sql += " and (CustomNo like '%" + CustomNo + "%')"; }
             if (!string.IsNullOrEmpty(name)) { sql += " and (name like '%" + name + "%')"; }
-            if (!string.IsNullOrEmpty(mobile)) { sql += " and (name like '%" + mobile + "%' or tel like '%" + mobile + "%')"; }
+            if (!string.IsNullOrEmpty(mobile)) { sql += " and (mobile like '%" + mobile + "%' or tel like '%" + mobile + "%')"; }
             if (begin > DEF_DATE) { sql += " and addon>='" + begin.Format() + "'"; }
             if (end > DEF_DATE) { sql += " and addon<='" + begin.Format() + "'"; }
             int recordCount = helper.GetOne(_sql).ToInt();
-            pageCount = pageno / PAGE_SIZE + (pageno % PAGE_SIZE == 0 ? 0 : 1);
+            pageCount = pageno / PAGE_SIZE + (recordCount % PAGE_SIZE == 0 ? 0 : 1);
             if (pageno <= 0) { pageno = 1; }
             if (pageno > pageCount) { pageno = pageCount; }
             sql += " limit " + (pageno - 1) * PAGE_SIZE + "," + PAGE_SIZE;

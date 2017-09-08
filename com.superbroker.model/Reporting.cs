@@ -4,6 +4,50 @@ using System.Text;
 
 namespace com.superbroker.model
 {
+    public class ReportingSimpleView {
+        /// <summary>
+        /// 申报编号
+        /// </summary>
+        public string ReportNo { get; set; }
+        /// <summary>
+        /// 返佣 0时比例 1时为指定金额 
+        /// </summary>
+        public int Fee { get; set; }
+        /// <summary>
+        /// 总价
+        /// </summary>
+        public int TotalPrice { get; set; }
+        /// <summary>
+        /// 备案时间
+        /// </summary>
+        public DateTime ReportOn { get; set; }
+        /// <summary>
+        /// 备案保护期 7天
+        /// </summary>
+        public DateTime ProtectedOn { get; set; }
+        /// <summary>
+        /// 到场时间
+        /// </summary>
+        public DateTime ArriveOn { get; set; }
+        /// <summary>
+        /// 到场保护期 30天
+        /// </summary>
+        public DateTime DisableOn { get; set; }        
+        /// <summary>
+        /// 返佣时间
+        /// </summary>
+        public DateTime PayFeeOn { get; set; }
+        /// <summary>
+        /// 当前状态
+        /// </summary>
+        public int State { get; set; }
+        public string BuilderName { get; set; }
+        public string CustomName { get; set; }
+        public string CustomMobile { get; set; }
+        public int Gender { get; set; }
+    }
+
+
     /// <summary>
     /// 申报记录
     /// </summary>
@@ -35,7 +79,11 @@ namespace com.superbroker.model
         /// </summary>
         public string HouseNo { get; set; }
         /// <summary>
-        /// 返佣比例
+        /// 分佣类型 0比例 1按金额
+        /// </summary>
+        public int FeeType { get; set; }
+        /// <summary>
+        /// 返佣 0时比例 1时为指定金额 
         /// </summary>
         public int Fee { get; set; }
         /// <summary>
@@ -90,5 +138,18 @@ namespace com.superbroker.model
         /// 当前状态
         /// </summary>
         public int State { get; set; }
+    }
+
+    public enum ReportState
+    {
+        /// <summary>
+        /// 备案失败
+        /// </summary>
+        ReportFail=0,
+        /// <summary>
+        /// 备案成功
+        /// </summary>
+        ReportSuccess =1,
+
     }
 }

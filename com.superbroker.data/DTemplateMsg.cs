@@ -90,7 +90,7 @@ namespace com.superbroker.data
             string where = " where 1=1 ";
             if (key != "") { where += " and Uid in (select id from " + Member.TABLENAME + " where name='" + key + "' or nickname='" + key + "' or mobile='" + key + "')"; }
             int recordCount = Convert.ToInt32(helper.GetOne(sql + where));
-            pageCount = pageCount / PAGE_SIZE + pageCount % PAGE_SIZE == 0 ? 0 : 1;
+            pageCount = pageCount / PAGE_SIZE + recordCount % PAGE_SIZE == 0 ? 0 : 1;
 
             sql = "select * from " + TemplateMsg.TABLENAME + where + " order by id desc limit " + (pageNum - 1) * PAGE_SIZE + "," + PAGE_SIZE;
             using (DataTable dt = helper.GetDataTable(sql))

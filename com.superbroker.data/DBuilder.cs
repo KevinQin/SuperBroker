@@ -47,6 +47,31 @@ namespace com.superbroker.data
             }
         }
 
+        public List<SimpleBuilderView> Get(out int pageCount, string name, string brand, string location, int pageno) {
+            List<Builder> list = Get(out pageCount, "", name, brand, "", "", "", location, location, "", pageno, DEF_DATE, DEF_DATE);
+            List<SimpleBuilderView> _list = new List<SimpleBuilderView>();
+            foreach (Builder item in list)
+            {
+                SimpleBuilderView bv = new SimpleBuilderView()
+                {
+                    BuilderNo = item.BuilderNo,
+                    City = item.City,
+                    District = item.District,
+                    Name = item.Name,
+                    Price = item.Price,
+                    Slogen = item.Slogen
+                };
+                if (!string.IsNullOrEmpty(item.D3Url)) {
+                    string[] p = item.D3Url.Split(',');
+                    if (p.Length > 0) { bv.HeadImg = p[0]; }
+                }
+                _list.Add(bv);               
+            }
+            list.Clear();
+            list = null;
+            return _list;
+        }
+
         public List<Builder> Get( out int pageCount,string BuilderNo, string name, string brand, string provider, string hottel, string province, string city,string district, string managerno, int pageno, DateTime begin, DateTime end, int pricelower=0, int priceupper=0)
         {
             List<Builder> list = new List<Builder>();
@@ -58,18 +83,18 @@ namespace com.superbroker.data
             if (!string.IsNullOrEmpty(hottel)) { sql += " and (hottel like '%" + hottel + "%')"; }
             if (!string.IsNullOrEmpty(provider)) { sql += " and (provider like '%" + provider + "%')"; }
             if (!string.IsNullOrEmpty(province)) { sql += " and (province like '%" + province + "%')"; }
-            if (!string.IsNullOrEmpty(city)) { sql += " and (city like '%" + city + "%')"; }
-            if (!string.IsNullOrEmpty(district)) { sql += " and (district like '%" + district + "%')"; }
+            if (!string.IsNullOrEmpty(city)) { sql += " and (locate('" + city + "',city)>0"; }
+            if (!string.IsNullOrEmpty(district)) { sql += " and (locate('" + district + "',district)>0"; }
             if (!string.IsNullOrEmpty(managerno)) { sql += " and (managerno like '%" + managerno + "%')"; }
             if (pricelower > 0) { sql += " and price>=" + pricelower; }
             if (priceupper > 0 && priceupper>=pricelower) { sql += " and price<=" + priceupper; }
             if (begin > DEF_DATE) { sql += " and addon>='" + begin.Format() + "'"; }
             if (end > DEF_DATE) { sql += " and addon<='" + begin.Format() + "'"; }
             int recordCount = helper.GetOne(_sql).ToInt();
-            pageCount = pageno / PAGE_SIZE + (pageno % PAGE_SIZE == 0 ? 0 : 1);
+            pageCount = pageno / PAGE_SIZE + (recordCount % PAGE_SIZE == 0 ? 0 : 1);
             if (pageno <= 0) { pageno = 1; }
             if (pageno > pageCount) { pageno = pageCount; }
-            sql += " limit " + (pageno - 1) * PAGE_SIZE + "," + PAGE_SIZE;
+            sql += " order by id desc limit " + (pageno - 1) * PAGE_SIZE + "," + PAGE_SIZE;
             using (DataTable dt = helper.GetDataTable(sql))
             {
                 foreach (DataRow r in dt.Rows)
@@ -96,6 +121,7 @@ namespace com.superbroker.data
                         Longitude = r["Longitude"].ToDouble(),
                         ManagerNo = r["ManagerNo"].ToString(),
                         MapUrl = r["MapUrl"].ToString(),
+                         Label=r["label"].ToString(),
                         OffOn = r["OffOn"].ToDateTime(),
                         Price = r["Price"].ToInt(),
                         Provider = r["Provider"].ToString(),
@@ -143,6 +169,7 @@ namespace com.superbroker.data
                         ManagerNo = r["ManagerNo"].ToString(),
                         MapUrl = r["MapUrl"].ToString(),
                         OffOn = r["OffOn"].ToDateTime(),
+                        Label = r["label"].ToString(),
                         Price = r["Price"].ToInt(),
                         Provider = r["Provider"].ToString(),
                         Province = r["Province"].ToString(),
