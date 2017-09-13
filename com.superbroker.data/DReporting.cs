@@ -47,6 +47,40 @@ namespace com.superbroker.data
             }
         }
 
+        public ReportingSimpleView Get(string BrokerNo, string rno) {
+            string sql = "select ReportNo,Fee,TotalPrice,b.Name as BuilderName ,b.City,b.District,r.AddOn,ReportOn,ProtectedOn,ArriveOn,DisableOn,PayFeeOn,State,c.Name,c.Mobile,c.Gender from " + Reporting.TABLENAME + " as r," + Custom.TABLENAME + " as c,"+ Builder.TABLENAME + " as b where b.BuilderNo=r.BuilderNo and  r.CustomNo = c.CustomNo and ReportNo='" + rno +"' and BrokerNo = '" + BrokerNo + "'";
+            ReportingSimpleView reporting = null;
+            using (DataTable dt = helper.GetDataTable(sql))
+            {
+                if (dt == null || dt.Rows.Count==0)
+                {
+
+                }
+                else {
+                    DataRow r= dt.Rows[0];
+                    reporting = new ReportingSimpleView()
+                    {
+                        ReportNo = r["ReportNo"].ToString(),
+                        Fee = r["Fee"].ToInt(),
+                        TotalPrice = r["TotalPrice"].ToInt(),
+                        ArriveOn = r["ArriveOn"].ToDateTime(),
+                        DisableOn = r["DisableOn"].ToDateTime(),
+                        PayFeeOn = r["PayFeeOn"].ToDateTime(),
+                        ProtectedOn = r["ProtectedOn"].ToDateTime(),
+                        ReportOn = r["ReportOn"].ToDateTime(),
+                        State = r["State"].ToInt16(),
+                        BuilderName = r["BuilderName"].ToString(),
+                        CustomMobile = r["Mobile"].ToString(),
+                        CustomName = r["Name"].ToString(),
+                        Gender = r["Gender"].ToInt16(),
+                        City=r["City"].ToString(),
+                        District=r["District"].ToString()
+                    };
+                }                
+            }
+            return reporting;
+        }
+
         public List<ReportingSimpleView> Get(string BrokerNo, int state, int pageno,  out int pageCount) {
             List<ReportingSimpleView> list = new List<ReportingSimpleView>();
             string _sql = "select count(id) from " + Reporting.TABLENAME + " where brokerno='" + BrokerNo + "'";
@@ -92,6 +126,38 @@ namespace com.superbroker.data
                         CustomMobile=r["Mobile"].ToString(),
                         CustomName=r["Name"].ToString(),
                         Gender=r["Gender"].ToInt16()
+                    };
+                    list.Add(reporting);
+                }
+            }
+            return list;
+        }
+
+        public List<ReportingSimpleView> GetFeeList(string BrokerNo)
+        {
+            List<ReportingSimpleView> list = new List<ReportingSimpleView>();          
+            string sql = "select ReportNo,Fee,TotalPrice,r.AddOn,ReportOn,ProtectedOn,ArriveOn,DisableOn,PayFeeOn,State,c.Name,c.Mobile,c.Gender,(select Name from " + Builder.TABLENAME + " where BuilderNo = r.BuilderNo) as BuilderName  from " + Reporting.TABLENAME + " as r," + Custom.TABLENAME + " as c where r.CustomNo = c.CustomNo and BrokerNo = '" + BrokerNo + "'";
+            sql += " and state in (4,7,8,9) ";           
+            sql += " order by state asc,PayFeeOn desc";
+            using (DataTable dt = helper.GetDataTable(sql))
+            {
+                foreach (DataRow r in dt.Rows)
+                {
+                    ReportingSimpleView reporting = new ReportingSimpleView()
+                    {
+                        ReportNo = r["ReportNo"].ToString(),
+                        Fee = r["Fee"].ToInt(),
+                        TotalPrice = r["TotalPrice"].ToInt(),
+                        ArriveOn = r["ArriveOn"].ToDateTime(),
+                        DisableOn = r["DisableOn"].ToDateTime(),
+                        PayFeeOn = r["PayFeeOn"].ToDateTime(),
+                        ProtectedOn = r["ProtectedOn"].ToDateTime(),
+                        ReportOn = r["ReportOn"].ToDateTime(),
+                        State = r["State"].ToInt16(),
+                        BuilderName = r["BuilderName"].ToString(),
+                        CustomMobile = r["Mobile"].ToString(),
+                        CustomName = r["Name"].ToString(),
+                        Gender = r["Gender"].ToInt16()
                     };
                     list.Add(reporting);
                 }

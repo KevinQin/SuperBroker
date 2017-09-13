@@ -10,7 +10,7 @@ namespace com.superbroker.model
         /// </summary>
         public string ReportNo { get; set; }
         /// <summary>
-        /// 返佣 0时比例 1时为指定金额 
+        /// 返佣 
         /// </summary>
         public int Fee { get; set; }
         /// <summary>
@@ -45,6 +45,8 @@ namespace com.superbroker.model
         public string CustomName { get; set; }
         public string CustomMobile { get; set; }
         public int Gender { get; set; }
+        public string City { get; set; }
+        public string District { get; set; }
     }
 
 
@@ -79,11 +81,11 @@ namespace com.superbroker.model
         /// </summary>
         public string HouseNo { get; set; }
         /// <summary>
-        /// 分佣类型 0比例 1按金额
+        /// 分佣类型 1比例 2按金额
         /// </summary>
         public int FeeType { get; set; }
         /// <summary>
-        /// 返佣 0时比例 1时为指定金额 
+        /// 返佣
         /// </summary>
         public int Fee { get; set; }
         /// <summary>

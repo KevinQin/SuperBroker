@@ -45,8 +45,10 @@
     <Compile Include="Builder.cs" />
     <Compile Include="Custom.cs" />
     <Compile Include="FundList.cs" />
+    <Compile Include="Help.cs" />
     <Compile Include="Member.cs" />
     <Compile Include="ModelBase.cs" />
+    <Compile Include="Notify.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Reporting.cs" />
     <Compile Include="ReportLog.cs" />

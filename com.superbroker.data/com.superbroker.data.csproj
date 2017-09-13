@@ -57,7 +57,9 @@
     <Compile Include="DBuilder.cs" />
     <Compile Include="DCustom.cs" />
     <Compile Include="DFundList.cs" />
+    <Compile Include="DHelp.cs" />
     <Compile Include="DMember.cs" />
+    <Compile Include="DNotify.cs" />
     <Compile Include="DReporting.cs" />
     <Compile Include="DReportLog.cs" />
     <Compile Include="DRoom.cs" />

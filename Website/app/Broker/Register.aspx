@@ -18,7 +18,7 @@
     <div class="container">
         <div class="page register-page js_show">
             <div class="page__bd">
-                 <div class="logo-row">
+                <div class="logo-row">
                     <img class="all" src="../images/reg-banner.png" />
                 </div>
                 <div class="weui-cells weui-cells_form">                    
@@ -31,7 +31,13 @@
                     <div class="weui-cell">
                         <div class="weui-cell__hd"><label class="weui-label"><i class="iconfont icon-iconfontshouji"></i></label></div>
                         <div class="weui-cell__bd">
-                            <input class="weui-input" type="text" id="txtMobile" required="required" pattern="[0-9]{11}" placeholder="请输入手机号码"/>
+                            <input class="weui-input" type="text" id="txtMobile" required="required" pattern="[0-9]{11}" placeholder="请填写手机号码"/>
+                        </div>
+                    </div> 
+                    <div class="weui-cell">
+                        <div class="weui-cell__hd"><label class="weui-label"><i class="iconfont icon-iconfontshouji"></i></label></div>
+                        <div class="weui-cell__bd">
+                            <input class="weui-input" type="text" id="txtCode" required="required" pattern="[0-9]{5}" placeholder="请填写邀请码"/>
                         </div>
                     </div> 
                     <div class="weui-cell">

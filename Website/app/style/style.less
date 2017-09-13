@@ -165,6 +165,195 @@ ul {
     font-size: @font-size-xxs;
 }
 
+.help-page {
+    .service{
+        margin-top:3rem;
+        text-align:center;
+        padding:3rem 1rem;
+        img{width:50%;}
+        p{margin:1rem;font-size:@font-size-xs;color:@black-color;}
+    }
+
+    ul {
+        li {
+            padding: .3rem;
+            margin: 0 auto .5rem auto;
+            border-bottom: 1px solid @border-color-light;
+            background-color: @white-color;
+
+            h4 {
+                font-weight: 400;
+                font-size: @font-size-xs;
+                color: @black-color;
+
+                em {
+                    color: @warning-color;
+                    font-weight: 600;
+                    font-size: @font-size-xs;
+                }
+            }
+
+            p {
+                font-size: @font-size-xxs;
+                line-height: 200%;
+                color: @disable-color;
+
+                em {
+                    color: @primary-color;
+                    font-weight: 600;
+                    font-size: @font-size-xs;
+                }
+            }
+        }
+    }
+
+    .notify {
+        margin: 0;
+        padding: .2rem .8rem;
+
+        li {
+            margin: .5rem auto;
+            padding: 1rem .8rem;
+            border: 1px solid @border-color-light;
+            border-radius: .3rem;
+            background-color: @white-color;
+
+            h3 {
+                font-size: @font-size-s;
+                color: @black-color;
+                line-height: 200%;
+                font-weight: 400;
+            }
+
+            h5 {
+                font-size: @font-size-xxs;
+                color: @gray-color;
+                line-height: 300%;
+                font-weight: 400;
+            }
+
+            p {
+                font-size: @font-size-xxs;
+                color: @black-color;
+                line-height: 150%;
+            }
+        }
+    }
+}
+
+.uc-page {
+    .panel__hd {
+        padding-top: 3rem;
+        height: 10rem;
+        background-color: @primary-color;
+        color: rgba(255,255,255,@press-alpha);
+        text-align: center;
+        font-size: @font-size-xxs;
+
+        .photo {
+            margin: 0 auto;
+
+            img {
+                background-color: @white-color;
+                width: 18%;
+                border: 3px solid @white-color;
+                border-radius: 50%;
+            }
+        }
+
+        h4 {
+            margin-top: .5rem;
+            color: @white-color;
+            font-size: @font-size-xs;
+            font-weight: normal;
+        }
+
+        h5 {
+            font-size: @font-size-xs;
+            font-weight: normal;
+            color: rgba(255,255,255,.6);
+        }
+
+        h2 {
+            font-size: @font-size-xxxl;
+            color: @white-color;
+            font-weight: 200;
+            line-height: 100%;
+        }
+
+        ul {
+            margin-top: 2.5rem;
+            list-style: none;
+            padding: .6rem 0;
+            display: flex;
+            background-color: rgba(255,255,255,.1);
+            flex-flow: row nowrap;
+
+            li {
+                flex: 1 1 auto;
+                text-align: center;
+                font-size: @font-size-xxs;
+                color: rgba(255,255,255,@press-alpha);
+                line-height: 100%;
+
+                h5 {
+                    font-size: @font-size-s;
+                    color: @white-color;
+                    font-weight: 400;
+                    padding: 0;
+                    margin: 0;
+                    margin-top: .3rem;
+                }
+            }
+        }
+    }
+
+    .weui-cells {
+        margin-top: .5rem;
+
+        p {
+            font-size: @font-size-xs;
+            line-height: 150%;
+        }
+
+        .weui-cell__hd {
+            i {
+                width: 20px;
+                margin-right: 5px;
+                display: block
+            }
+        }
+    }
+
+    ul.logs {
+        list-style: none;
+        padding: 0;
+        margin-top: .3rem;
+        background-color: @white-color;
+
+        li {
+            display: flex;
+            flex-flow: row nowrap;
+            padding: .5rem .3rem;
+            border-top: 1px solid @gray-light-color;
+
+            .info-col {
+                font-size: @font-size-xxs;
+                color: @disable-color;
+                flex: 0 0 50%;
+            }
+
+            .price-col {
+                padding-top: .5rem;
+                font-size: @font-size-xxs;
+                color: @gray-color;
+                flex: 0 0 50%;
+                text-align: right;
+            }
+        }
+    }
+}
+
 .history-page {
 
     .weui-navbar {
@@ -190,6 +379,122 @@ ul {
         background-color: #fafafa;
         border-bottom: 3px solid @primary-color;
         color: @primary-color;
+    }
+
+    .logs-list {
+        margin-bottom: .3rem;
+        background-color: @white-color;
+
+        .title-row {
+            background-color: @bg-gray;
+            padding: .3rem;
+            font-size:@font-size-xxs;
+            color: @disable-color;
+        }
+
+        ul {
+            list-style: none;
+            margin: 0;
+            padding-left: .3rem;
+
+            li {
+                list-style: none;
+                padding: .3rem;
+                margin-bottom:0;
+                border-bottom:none;
+                border-top: 1px solid @border-color-light;
+
+                h5 {
+                    font-size: @font-size-xxs;
+                    color: @gray-color;
+                    font-weight:normal;
+                    line-height: 150%;
+                }
+
+                p {
+                    font-size: @font-size-xxs;
+                    color: @disable-color;
+                    line-height: 150%;
+                }
+            }
+        }
+    }
+
+    .info-list {
+        margin-bottom: .3rem;
+        background-color: @white-color;
+        padding: .3rem;
+
+        p {
+            em {
+                font-style: normal;
+                color: @primary-color;
+            }
+
+            font-size: @font-size-xxs;
+            color: @disable-color;
+            border-bottom: 1px solid @gray-light-color;
+            line-height: 200%;
+
+            &:last-child {
+                border-bottom: none;
+            }
+        }
+
+        .price-row {
+            display: flex;
+            flex-flow: row nowrap;
+            padding: .5rem .5rem .5rem 0;
+
+            .info-col {
+                flex: 1 1 auto;
+                font-size: @font-size-xxs;
+                padding-left: 2em;
+                color: @disable-color;
+            }
+
+            .num-col {
+                font-size: @font-size-xxs;
+                flex: 1 1 auto;
+                text-align: right;                
+
+                h3 {
+                    font-size: @font-size-l;
+                    color: @black-color;
+                }
+            }
+        }
+    }
+
+    .blank-area {
+        margin-bottom: .3rem;
+        background-color: @white-color;
+        padding: .3rem;
+        display: flex;
+        flex-flow: row nowrap;
+
+        .icon-col {
+            flex: 0 0 1.5rem;
+            font-size: @font-size-s;
+            color: @disable-color;
+        }
+
+        .info-col {
+            flex: 1 1 auto;
+
+            h5 {
+                font-size: @font-size-xs;
+                color: @black-color;
+                line-height: @font-size-xl;
+                font-weight: 400;
+            }
+
+            p {
+                font-size: @font-size-xxs;
+                color: @disable-color;
+                line-height: 150%;
+            }
+        }
     }
 
     ul {
@@ -333,6 +638,7 @@ ul {
             i {
                 font-size: @font-size-m;
             }
+
         }
 
         .weui-select {
@@ -356,6 +662,9 @@ ul {
                 font-size: @font-size-xs;
                 font-weight: 600;
             }
+
+            span{font-size:@font-size-xs;color:@black-color;}
+            .gray{color:@gray-color;}
 
             input[type=password] {
                 font-size: @font-size-xs;

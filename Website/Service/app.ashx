@@ -113,6 +113,36 @@ public class AppHandler:IHttpHandler,IRequiresSessionState {
                 case 108:
                     Result = GetReportList(c);//获取报备列表
                     break;
+                case 109:
+                    Result = GetReportDetail(c);//报备详情
+                    break;
+                case 110:
+                    Result = GetReportLog(c);//获取报备日志
+                    break;
+                case 111:
+                    Result = GetFeeList(c);//获取返佣日志
+                    break;
+                case 112:
+                    Result = GetBrokerInfo(c);//
+                    break;
+                case 113:
+                    Result = EditBrokerInfo(c);
+                    break;
+                case 114:
+                    Result = EditBankInfo(c);
+                    break;
+                case 115:
+                    Result = CheckPwd(c);//
+                    break;
+                case 116:
+                    Result = ChangePwd(c);//
+                    break;
+                case 117:
+                    Result = GetNotifyList(c);//
+                    break;
+                case 118:
+                    Result = GetHelpList(c);//
+                    break;
                 case 999:
                     Result = Test(c);
                     break;
@@ -128,11 +158,208 @@ public class AppHandler:IHttpHandler,IRequiresSessionState {
         return ReplaceTableName(Result);
     }
 
+    private string GetHelpList(HttpContext c) {
+        List<Help> list = new DHelp().Get();
+        if (list != null)
+        {
+            return response.Success(list);
+        }
+        else {
+            return response.Fail("Error");
+        }
+    }
+
+    private string GetNotifyList(HttpContext c) {
+        string openid = c.Request["openid"].ToString();
+        Broker broker = new DBroker().Get(0, openid);
+        int pagenum = c.Request["pageno"].ToInt16();
+        if (broker == null) {
+            return response.Fail("没有权限[-2]");
+        }
+        else {
+            int PageCount = 0;
+            List<Notify> list = new DNotify().Get(out PageCount, broker.WorkNo, pagenum);
+            if (list != null)
+            {
+                return response.Success(list, new { PageCount = PageCount, PageNo = pagenum });
+            }
+            else {
+                return response.Fail("Error");
+            }
+        }
+    }
+
+    private string ChangePwd(HttpContext c) {
+        string oldpwd = c.Request["oldpwd"].ToString();
+        string openid = c.Request["openid"].ToString();
+        string pwd = c.Request["pwd"].ToString();
+        Broker broker = new DBroker().Get(0, openid);
+        int id = 0;
+        if (broker != null && new DBroker().Login(openid, broker.Mobile,oldpwd,out id)!=null)
+        {
+            if (id == 1) {
+
+                broker.Password = pwd;
+                if (new DBroker().Update(broker))
+                {
+                    Log.D("经纪人修改登录密码为【"+ pwd +"】", c);
+                    return response.Success("Success");
+                }
+                else {
+                    Log.D("经纪人修改登录密码失败", c);
+                    return response.Fail("ChangeError");
+                }
+            }
+            else
+            {
+                Log.D("经纪人修改登录密码失败", c);
+                return response.Fail("Error["+ id +"]");
+            }
+
+        }
+        else {
+            Log.D("经纪人修改登录密码失败", c);
+            return response.Fail("Error["+ id +"]");
+        }
+    }
+
+    private string CheckPwd(HttpContext c) {
+        string openid = c.Request["openid"].ToString();
+        string oldpwd = c.Request["oldpwd"].ToString();
+        Broker broker = new DBroker().Get(0, openid);
+        int id = 0;
+        if (broker != null && new DBroker().Login(openid, broker.Mobile,oldpwd,out id)!=null)
+        {
+            if (id == 1) {
+                return response.Success("Success");
+            }
+            else
+            {
+                return response.Fail("Error["+ id +"]");
+            }
+
+        }
+        else {
+            return response.Fail("Error["+ id +"]");
+        }
+    }
+
+    private string EditBankInfo(HttpContext c) {
+        string openid = c.Request["openid"].ToString();
+        Broker broker = new DBroker().Get(0, openid);
+        if (broker == null ) {
+            return response.Fail("没有权限[-2]");
+        }
+        string bankinfo = c.xRequest("bankinfo");
+        string account = c.xRequest("account");
+        string cardno = c.xRequest("cardno");
+        broker.BankInfo = bankinfo;
+        broker.BankCardNo = cardno;
+        broker.AccountName = account;
+        if (new DBroker().Update(broker))
+        {
+            Log.D("经纪人修改银行卡信息为【"+ bankinfo +"】【"+ account +"】【"+ cardno +"】", c);
+            return response.Success("Success");
+        }
+        else {
+            Log.D("经纪人修改银行卡信息失败", c);
+            return response.Fail("err");
+        }
+    }
+
+    private string EditBrokerInfo(HttpContext c) {
+        string openid = c.Request["openid"].ToString();
+        int id = c.xRequest("id").ToInt();
+        Broker broker = new DBroker().Get(0, openid);
+        if (broker == null || broker.Id!=id) {
+            return response.Fail("没有权限[-2]");
+        }
+        string mobile = c.xRequest("mobile");
+        int gender = c.xRequest("gender").ToInt16();
+        string tel = c.xRequest("tel");
+        string city = c.xRequest("city");
+        string address = c.xRequest("address");
+        string trade = c.xRequest("trade");
+        string company = c.xRequest("company");
+        broker.Mobile = mobile;
+        broker.Gender = gender;
+        broker.Tel = tel;
+        broker.Area = city;
+        broker.Address = address;
+        broker.Trade = trade;
+        broker.Company = company;
+        if (new DBroker().Update(broker))
+        {
+            Log.D("经纪人修改个人信息完成", c);
+            return response.Success("Success");
+        }
+        else {
+            Log.D("经纪人修改个人信息失败", c);
+            return response.Fail("err");
+        }
+    }
+
+    private string GetFeeList(HttpContext c) {
+        string openid = c.Request["openid"].ToString();
+        Broker broker = new DBroker().Get(0, openid);
+        if (broker == null) {
+            return response.Fail("没有权限[-2]");
+        }
+        string BrokerNo = broker.WorkNo;
+        List<ReportingSimpleView> list = new DReporting().GetFeeList(BrokerNo);
+        if (list == null)
+        {
+            return response.Fail("Load Log Error");
+        }
+        else
+        {
+            return response.Success(list);
+        }
+    }
+
+    private string GetReportLog(HttpContext c) {
+        string openid = c.Request["openid"].ToString();
+        Broker broker = new DBroker().Get(0, openid);
+        if (broker == null) {
+            return response.Fail("没有权限[-2]");
+        }
+        string BrokerNo = broker.WorkNo;
+        string rno = c.xRequest("rno");
+        List<ReportLog> list = new DReportLog().Get(rno);
+        if (list == null)
+        {
+            return response.Fail("Load Log Error");
+        }
+        else
+        {
+            return response.Success(list);
+        }
+    }
+
+    private string GetReportDetail(HttpContext c) {
+        string openid = c.Request["openid"].ToString();
+        Broker broker = new DBroker().Get(0, openid);
+        if (broker == null) {
+            return response.Fail("没有权限[-2]");
+        }
+        string BrokerNo = broker.WorkNo;
+        string rno = c.xRequest("rno");
+        ReportingSimpleView view = new DReporting().Get(BrokerNo, rno);
+        if (view == null)
+        {
+            return response.Fail("Load Detail Error");
+        }
+        else
+        {
+            return response.Success(view, new { BankInfo = broker.BankInfo, BankCard = broker.BankCardNo, BankAccount = broker.AccountName });
+        }
+    }
+
     private string GetReportList(HttpContext c) {
         string openid = c.Request["openid"].ToString();
         Broker broker = new DBroker().Get(0, openid);
         if (broker == null) {
-            return response.Fail("无权获取当前备案信息[-2]");
+            return response.Fail("没有权限[-2]");
         }
         string BrokerNo = broker.WorkNo;
         int state = c.xRequest("state").ToInt16();
@@ -297,6 +524,15 @@ public class AppHandler:IHttpHandler,IRequiresSessionState {
         }
     }
 
+    private string GetBrokerInfo(HttpContext c) {
+        string openid = c.Request["openid"].ToString();
+        Broker broker = new DBroker().Get(0, openid);
+        if (broker == null) {
+            return response.Fail("无权获取当前备案信息[-2]");
+        }
+        return response.Success(broker);
+    }
+
     private string BrokerLogin(HttpContext c) {
         string account = c.xRequest("account").ToString();
         string openid = c.Request["openid"].ToString();
@@ -317,11 +553,12 @@ public class AppHandler:IHttpHandler,IRequiresSessionState {
         string mobile = c.xRequest("mobile").ToString();
         string pwd = c.Request["pwd"].ToString();
         string openid = c.Request["openid"].ToString();
+        int code = c.Request["code"].ToInt();
         Member member = new DMember().Get(openid);
         Broker broker = new Broker() {
             AccountName="", AddOn=DateTime.Now, Address="",
             Area=member.Country+","+member.Province+","+member.City, AvatarMediaId=member.PhotoUrl,
-            BankCardNo="", BankInfo="", CheckInfo="", CheckOn=DEF_DATE, CheckWorkNo="", Company="",
+            BankCardNo="", BankInfo="", CheckInfo="等待审核", CheckOn=DEF_DATE, CheckWorkNo=code.ToString(), Company="",
             FeePeer=0, Gender=member.Gender, Memo="", Mobile=mobile, Name=name,
             OpenId=openid, Password=pwd, State= 0, Tel="", Trade="", UnionId="", UptimeOn=DEF_DATE, WorkNo=""
         };
@@ -330,10 +567,12 @@ public class AppHandler:IHttpHandler,IRequiresSessionState {
         {
             if (Id > 0)
             {
+                Log.D("注册经纪人成功【" + broker.Name + "," + broker.Mobile + "】，邀请码【" + code + "】",c);
                 return response.Success("注册成功");
             }
             else
             {
+                Log.D("注册经纪人失败【" + broker.Name + "," + broker.Mobile + "】，邀请码【" + code + "】",c);
                 return response.Fail("注册失败",-1);
             }
         }
@@ -344,11 +583,11 @@ public class AppHandler:IHttpHandler,IRequiresSessionState {
 
     public string Test(HttpContext c)
     {
-        string xml = "<xml><ToUserName><![CDATA[gh_1ead2193ad3d]]></ToUserName><FromUserName><![CDATA[o3MRawEmK5OK-ringNnTyiNPA6uM]]></FromUserName><CreateTime>1504167115</CreateTime><MsgType><![CDATA[event]]></MsgType><Event><![CDATA[unsubscribe]]></Event><EventKey><![CDATA[]]></EventKey></xml>";
+        /*string xml = "<xml><ToUserName><![CDATA[gh_1ead2193ad3d]]></ToUserName><FromUserName><![CDATA[o3MRawEmK5OK-ringNnTyiNPA6uM]]></FromUserName><CreateTime>1504167115</CreateTime><MsgType><![CDATA[event]]></MsgType><Event><![CDATA[unsubscribe]]></Event><EventKey><![CDATA[]]></EventKey></xml>";
         BaseMessage msg= Common.ConvertObj<EventMessage>(xml);
         Log.F(msg.FromUserName,c);
-        msg.ResText("猜猜我是谁？");
-        return response.Success(msg.MsgType);
+        msg.ResText("猜猜我是谁？");*/
+        return response.Success("");
     }
 
     public string GetOrderNo()

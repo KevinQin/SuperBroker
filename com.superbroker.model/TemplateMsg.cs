@@ -7,7 +7,7 @@ namespace com.superbroker.model
 {
     public class TemplateMsg:ModelBase
     {
-        public new const String TABLENAME = "s_template_msg";
+        public new const String TABLENAME = "s_tempmsg";
 
         /// <summary>
         /// OpenId

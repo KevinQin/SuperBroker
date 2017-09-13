@@ -51,7 +51,7 @@ namespace com.superbroker.data
         {
             List<ReportLog> list = new List<ReportLog>();
             string sql = "select * from " + ReportLog.TABLENAME + " where 1=1 ";            
-            sql += " and reportno='" + reportno + "')";            
+            sql += " and reportno='" + reportno + "'";            
             using (DataTable dt = helper.GetDataTable(sql))
             {
                 foreach (DataRow r in dt.Rows)
@@ -63,7 +63,7 @@ namespace com.superbroker.data
                         WorkNo = r["WorkNo"].ToString(),
                         Id = r["Id"].ToInt(),
                         Memo = r["Memo"].ToString(),
-                        State = r["Mobile"].ToInt16()                      
+                        State = r["state"].ToInt16()                      
                     };
                     list.Add(log);
                 }

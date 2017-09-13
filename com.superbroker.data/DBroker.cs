@@ -38,14 +38,32 @@ namespace com.superbroker.data
         {
             SqlObject sql = new SqlObject(SqlObjectType.Update, t, DB_TYPE);
             sql.Where = " id=" + t.Id;
-            if (sql.AddAllField())
+            sql.AddField("AccountName", t.AccountName, SqlFieldType.String);
+            sql.AddField("Address", t.Address, SqlFieldType.String);
+            sql.AddField("Area", t.Area, SqlFieldType.String);
+            sql.AddField("BankCardNo", t.BankCardNo, SqlFieldType.String);
+            sql.AddField("BankInfo", t.BankInfo, SqlFieldType.String);
+            sql.AddField("CheckInfo", t.CheckInfo, SqlFieldType.String);
+            sql.AddField("CheckOn", t.CheckOn, SqlFieldType.DateTime);
+            sql.AddField("CheckWorkNo", t.CheckWorkNo, SqlFieldType.String);
+            sql.AddField("Company", t.Company, SqlFieldType.String);
+            sql.AddField("FeePeer", t.FeePeer, SqlFieldType.Int);
+            sql.AddField("Gender", t.Gender, SqlFieldType.Int);
+            sql.AddField("Memo", t.Memo, SqlFieldType.String);
+            sql.AddField("Mobile", t.Mobile, SqlFieldType.String);
+            sql.AddField("Name", t.Name, SqlFieldType.String);
+            sql.AddField("OpenId", t.OpenId, SqlFieldType.String);
+            sql.AddField("State", t.State, SqlFieldType.Int);
+            sql.AddField("Tel", t.Tel, SqlFieldType.String);
+            sql.AddField("Trade", t.Trade, SqlFieldType.String);
+            sql.AddField("UnionId", t.UnionId, SqlFieldType.String);
+            sql.AddField("UptimeOn", t.UptimeOn, SqlFieldType.DateTime);
+            sql.AddField("WorkNo", t.WorkNo, SqlFieldType.String);
+            if (t.Password != "")
             {
-                return helper.ExecuteSqlNoResult(sql);
-            }
-            else
-            {
-                return false;
-            }
+                sql.AddField("Password", PasswordEncode(t.Password), SqlFieldType.String);
+            }            
+            return helper.ExecuteSqlNoResult(sql);           
         }
 
         public bool ChangeState(string BrokerNo, string WorkNo,string info, int state) {
@@ -98,7 +116,7 @@ namespace com.superbroker.data
                         Mobile = r["Mobile"].ToString(),
                         Name = r["Name"].ToString(),
                         OpenId = r["OpenId"].ToString(),
-                        Password = r["Password"].ToString(),
+                        Password ="",
                         State = r["State"].ToInt16(),
                         Tel = r["Tel"].ToString(),
                         Trade = r["Trade"].ToString(),
@@ -113,7 +131,7 @@ namespace com.superbroker.data
         }
 
         public Broker Login(string openid, string account, string pwd,out int ErrCode) {
-            Broker broker = Get(0,openid);
+            Broker broker = Get(0,openid,"",true);
             ErrCode = 0;
             if (broker != null)
             {
@@ -146,8 +164,9 @@ namespace com.superbroker.data
             return broker;
         }
 
-        public Broker Get(int id=0, string openid="", string workno=null) {
+        public Broker Get(int id=0, string openid="", string workno=null,bool withPassword=false) {
             Broker broker = null;
+            if(id==0 && openid == "") { return null; }
             string sql= "select* from "+ Broker.TABLENAME;
             if (id > 0) { sql += " where id=" + id; }
             if (!string.IsNullOrEmpty(workno)) { sql += " where workno='" + workno + "'"; }
@@ -174,7 +193,7 @@ namespace com.superbroker.data
                         Mobile=r["Mobile"].ToString(),
                         Name=r["Name"].ToString(),
                         OpenId=r["OpenId"].ToString(),
-                        Password=r["Password"].ToString(),
+                        Password="",
                         State=r["State"].ToInt16(),
                         Tel=r["Tel"].ToString(),
                         Trade=r["Trade"].ToString(),
@@ -182,6 +201,7 @@ namespace com.superbroker.data
                         UptimeOn=r["UptimeOn"].ToDateTime(),
                         WorkNo=r["WorkNo"].ToString()
                     };
+                    if (withPassword) { broker.Password = r["Password"].ToString(); }
                 }
             }
             return broker;
