@@ -139,11 +139,12 @@ namespace com.superbroker.model
         /// <summary>
         /// 当前状态
         /// </summary>
-        public int State { get; set; }
+        public ReportState State { get; set; }
     }
 
     public enum ReportState
     {
+        All=-1,
         /// <summary>
         /// 备案失败
         /// </summary>
@@ -152,6 +153,53 @@ namespace com.superbroker.model
         /// 备案成功
         /// </summary>
         ReportSuccess =1,
-
+        /// <summary>
+        /// 备案保护期已失效
+        /// </summary>
+        ReportDisable=2,
+        /// <summary>
+        /// 到案场
+        /// </summary>
+        InBuilder=3,
+        /// <summary>
+        /// 到场已订
+        /// </summary>
+        InBuilderBuy=4,
+        /// <summary>
+        /// 到场未订
+        /// </summary>
+        InBuilderNoBuy=5,
+        /// <summary>
+        /// 到场保护失效
+        /// </summary>
+        InBuilderDisable=6,
+        /// <summary>
+        /// 已签约/已首付
+        /// </summary>
+        FirstPay=7,
+        /// <summary>
+        /// 分佣至平台
+        /// </summary>
+        FeeInPlat=8,
+        /// <summary>
+        /// 已分佣
+        /// </summary>
+        FeePaied=9,
+        /// <summary>
+        /// 用户退房
+        /// </summary>
+        UserRefund=10,
+        /// <summary>
+        /// 退佣至平台
+        /// </summary>
+        RefundToPlat=11,
+        /// <summary>
+        /// 退佣至开发商
+        /// </summary>
+        RefundToBuilder=12,
+        /// <summary>
+        /// 除报备失败外所有
+        /// </summary>
+        OutFail=99
     }
 }

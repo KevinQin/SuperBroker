@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Web;
 
@@ -33,7 +34,7 @@ namespace com.superbroker.data
                 return false;
             }
         }
-
+        
         public bool Update(Broker t)
         {
             SqlObject sql = new SqlObject(SqlObjectType.Update, t, DB_TYPE);
@@ -66,17 +67,26 @@ namespace com.superbroker.data
             return helper.ExecuteSqlNoResult(sql);           
         }
 
-        public bool ChangeState(string BrokerNo, string WorkNo,string info, int state) {
+        public bool ChangeState(string BrokerNo,int Id, string WorkNo,string info, BrokerState state) {
             SqlObject sql = new SqlObject(SqlObjectType.Update, Broker.TABLENAME, DB_TYPE);
-            sql.Where = " workno='" + BrokerNo + "'";
-            sql.AddField("State", state, SqlFieldType.Int);
+            sql.Where = " Id="+ Id +" and workno='" + BrokerNo + "'";
+            sql.AddField("State", Convert.ToInt16(state), SqlFieldType.Int);
             sql.AddField("CheckOn", DateTime.Now, SqlFieldType.DateTime);
             sql.AddField("CheckWorkNo", WorkNo, SqlFieldType.String);
             sql.AddField("CheckInfo", info, SqlFieldType.String);
             return helper.ExecuteSqlNoResult(sql);
         }
 
-        public List<Broker> Get(string workno, string name, string mobile, string area, int state, int pageno, DateTime begin, DateTime end,out int pageCount) {
+        public int GetWorkNo() {
+            object obj = helper.GetOne("select workno from " + Broker.TABLENAME + " order by workno desc limit 0,1");
+            int result = 60001;
+            if (obj != null) {
+                result = Convert.ToInt32(obj) + 1;
+            }
+            return result;
+        }
+
+        public List<Broker> Get(string workno, string name, string mobile, string area, BrokerState state, int pageno, DateTime begin, DateTime end,out int pageCount) {
             List<Broker> list = new List<Broker>();
             string sql = "select * from " + Broker.TABLENAME+" where 1=1 ";
             string _sql = "select count(id) from " + Broker.TABLENAME + " where 1=1 ";
@@ -84,7 +94,7 @@ namespace com.superbroker.data
             if (!string.IsNullOrEmpty(name)) { sql += " and (name like '%" + name + "%')"; }
             if (!string.IsNullOrEmpty(mobile)) { sql += " and (name like '%" + mobile + "%' or tel like '%"+ mobile +"%')"; }
             if (!string.IsNullOrEmpty(area)) { sql += " and (area like '%" + area + "%')"; }
-            if (state>=0) { sql += " and state=" + area ; }
+            if (state>=0) { sql += " and state=" + Convert.ToInt16(state) ; }
             if (begin > DEF_DATE) { sql += " and addon>='"+ begin.Format() +"'"; }
             if (end > DEF_DATE) { sql += " and addon<='" + begin.Format() + "'"; }            
             int recordCount = helper.GetOne(_sql).ToInt();
@@ -117,7 +127,7 @@ namespace com.superbroker.data
                         Name = r["Name"].ToString(),
                         OpenId = r["OpenId"].ToString(),
                         Password ="",
-                        State = r["State"].ToInt16(),
+                        State =(BrokerState)Enum.Parse(typeof(BrokerState),r["State"].ToString()),
                         Tel = r["Tel"].ToString(),
                         Trade = r["Trade"].ToString(),
                         UnionId = r["UnionId"].ToString(),
@@ -137,7 +147,7 @@ namespace com.superbroker.data
             {
                 if (broker.Mobile == account || broker.WorkNo == account)
                 {
-                    if (broker.State == 1)
+                    if (broker.State ==  BrokerState.Checked)
                     {
 
                         if (broker.Password == PasswordEncode(pwd))
@@ -150,7 +160,7 @@ namespace com.superbroker.data
                         }
                     }
                     else {
-                        ErrCode = broker.State;
+                        ErrCode = Convert.ToInt16(broker.State);
                     }
                 }
                 else
@@ -167,10 +177,10 @@ namespace com.superbroker.data
         public Broker Get(int id=0, string openid="", string workno=null,bool withPassword=false) {
             Broker broker = null;
             if(id==0 && openid == "") { return null; }
-            string sql= "select* from "+ Broker.TABLENAME;
-            if (id > 0) { sql += " where id=" + id; }
-            if (!string.IsNullOrEmpty(workno)) { sql += " where workno='" + workno + "'"; }
-            if (!string.IsNullOrEmpty(openid)) { sql += " where openid='" + openid + "'"; }
+            string sql= "select * from "+ Broker.TABLENAME +" where 1=1 ";
+            if (id > 0) { sql += " and id=" + id; }
+            if (!string.IsNullOrEmpty(workno)) { sql += " and workno='" + workno + "'"; }
+            if (!string.IsNullOrEmpty(openid)) { sql += " and openid='" + openid + "'"; }
             using (DataTable dt = helper.GetDataTable(sql)) {
                 if (dt.Rows.Count > 0) {
                     DataRow r = dt.Rows[0];
@@ -194,7 +204,7 @@ namespace com.superbroker.data
                         Name=r["Name"].ToString(),
                         OpenId=r["OpenId"].ToString(),
                         Password="",
-                        State=r["State"].ToInt16(),
+                        State=(BrokerState)Enum.Parse(typeof(BrokerState), r["State"].ToString()),
                         Tel=r["Tel"].ToString(),
                         Trade=r["Trade"].ToString(),
                         UnionId=r["UnionId"].ToString(),

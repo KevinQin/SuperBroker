@@ -82,7 +82,7 @@ namespace com.superbroker.model
         /// <summary>
         /// 当前状态 0未审核 1通过 2暂停 9拒绝 
         /// </summary>
-        public int State { get; set; }
+        public BrokerState State { get; set; }
         /// <summary>
         /// 审核时间
         /// </summary>
@@ -103,5 +103,9 @@ namespace com.superbroker.model
         /// 备注
         /// </summary>
         public string Memo { get; set; }
+    }
+
+    public enum BrokerState {
+        New=0, Checked=1, UnChecked = 2, Pause = 3,OffLine=9
     }
 }

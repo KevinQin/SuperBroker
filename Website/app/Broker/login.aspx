@@ -24,7 +24,7 @@
                     <div class="weui-cell">
                         <div class="weui-cell__hd"><label class="weui-label"><i class="iconfont icon-jingjiren1"></i></label></div>
                         <div class="weui-cell__bd">
-                            <input class="weui-input" type="number" id="txtAccount" required="required" pattern="[0-9]{5,11}" placeholder="请填写经纪人账号或手机"/>
+                            <input class="weui-input" type="number" id="txtAccount" required="required" pattern="[0-9]{3,11}" placeholder="请填写经纪人账号或手机"/>
                         </div>
                     </div>                   
                     <div class="weui-cell">

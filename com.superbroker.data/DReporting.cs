@@ -81,23 +81,23 @@ namespace com.superbroker.data
             return reporting;
         }
 
-        public List<ReportingSimpleView> Get(string BrokerNo, int state, int pageno,  out int pageCount) {
+        public List<ReportingSimpleView> Get(string BrokerNo, ReportState state, int pageno,  out int pageCount) {
             List<ReportingSimpleView> list = new List<ReportingSimpleView>();
             string _sql = "select count(id) from " + Reporting.TABLENAME + " where brokerno='" + BrokerNo + "'";
             string sql= "select ReportNo,Fee,TotalPrice,r.AddOn,ReportOn,ProtectedOn,ArriveOn,DisableOn,PayFeeOn,State,c.Name,c.Mobile,c.Gender,(select Name from "+ Builder.TABLENAME +" where BuilderNo = r.BuilderNo) as BuilderName  from "+ Reporting.TABLENAME +" as r,"+ Custom.TABLENAME +" as c where r.CustomNo = c.CustomNo and BrokerNo = '"+ BrokerNo +"'";
-            if (state >= 0) {
-                _sql += " and state = " + state;
-                sql += " and state = " + state;
+            if (state> ReportState.All) {
+                _sql += " and state = " + Convert.ToInt16(state);
+                sql += " and state = " + Convert.ToInt16(state);
             }
             string orderby = "addon";
-            if (state == 0 || state == 1 || state == 2)
+            if (state == ReportState.ReportFail || state == ReportState.ReportSuccess || state == ReportState.ReportDisable)
             {
                 orderby = "ReportOn";
             }
-            else if (state == 3 || state == 4 || state == 5 || state == 6) {
+            else if (state == ReportState.InBuilder || state == ReportState.InBuilderBuy || state == ReportState.InBuilderNoBuy || state == ReportState.InBuilderDisable) {
                 orderby = "ArriveOn";
             }
-            else if (state ==9)
+            else if (state == ReportState.FeePaied)
             {
                 orderby = "PayFeeOn";
             }
@@ -165,7 +165,7 @@ namespace com.superbroker.data
             return list;
         }
 
-        public List<Reporting> Get(int pageno, out int pageCount,string CustomName, string CustomMobile, string BuilderName, string BrokerNo, string ReportNo, DateTime begin, DateTime end, int state=99)
+        public List<Reporting> Get(int pageno, out int pageCount,string CustomName, string CustomMobile, string BuilderName, string BrokerNo, string ReportNo, DateTime begin, DateTime end, ReportState state= ReportState.OutFail)
         {
             List<Reporting> list = new List<Reporting>();
             string sql = "select * from " + Reporting.TABLENAME + " where 1=1 ";
@@ -174,74 +174,74 @@ namespace com.superbroker.data
             if (!string.IsNullOrEmpty(BuilderName)) { sql += " and BuilderNo in ( select BuilderNo from "+ Builder.TABLENAME +" where name like '%" + BuilderName + "%')"; }
             if (!string.IsNullOrEmpty(BrokerNo)) { sql += " and BrokerNo in ( select BrokerNo from " + Broker.TABLENAME + " where name like '%" + BuilderName + "%')"; }
             if (!string.IsNullOrEmpty(ReportNo)) { sql += " and ReportNo like '%" + ReportNo + "%'"; }
-            if (state >= 0) {
-                if (state == 99)
+            if (state >=  ReportState.ReportFail) {
+                if (state == ReportState.OutFail)
                 {
                     sql += " and (state=1 or state=3 or state=4 or state=5 or state=7 or state=8 or state=9 or state=11) ";
                 }
                 else
                 {
-                    sql += " and state=" + state;
-                    if (state == 0 || state == 1)
+                    sql += " and state=" + Convert.ToInt16(state);
+                    if (state == ReportState.ReportFail || state ==  ReportState.ReportSuccess)
                     {//备案失败+成功
                         if (begin > DEF_DATE) { sql += " and ReportOn>='" + begin.Format() + "'"; }
                         if (end > DEF_DATE) { sql += " and ReportOn<='" + begin.Format() + "'"; }
                     }
-                    else if (state == 2)
+                    else if (state == ReportState.ReportDisable)
                     {
                         //已过备案保护期
                         if (begin > DEF_DATE) { sql += " and ProtectedOn>='" + begin.Format() + "'"; }
                         if (end > DEF_DATE) { sql += " and ProtectedOn<='" + begin.Format() + "'"; }
                     }
-                    else if (state == 3 || state == 5)
+                    else if (state == ReportState.InBuilder || state == ReportState.InBuilderNoBuy)
                     {
                         //到案场 + 到案场未预订，需要跟进
                         if (begin > DEF_DATE) { sql += " and ArriveOn>='" + begin.Format() + "'"; }
                         if (end > DEF_DATE) { sql += " and ArriveOn<='" + begin.Format() + "'"; }
                     }
-                    else if (state == 4)
+                    else if (state ==  ReportState.InBuilderBuy)
                     {
                         //预订
                         if (begin > DEF_DATE) { sql += " and DownPaymentOn>='" + begin.Format() + "'"; }
                         if (end > DEF_DATE) { sql += " and DownPaymentOn<='" + begin.Format() + "'"; }
                     }
-                    else if (state == 6)
+                    else if (state ==  ReportState.InBuilderDisable)
                     {
                         //到场未预订,已过保护期
                         if (begin > DEF_DATE) { sql += " and DisableOn>='" + begin.Format() + "'"; }
                         if (end > DEF_DATE) { sql += " and DisableOn<='" + begin.Format() + "'"; }
                     }
-                    else if (state == 7)
+                    else if (state ==  ReportState.FirstPay)
                     {
                         //到签约/首付
                         if (begin > DEF_DATE) { sql += " and SignedOn>='" + begin.Format() + "'"; }
                         if (end > DEF_DATE) { sql += " and SignedOn<='" + begin.Format() + "'"; }
                     }
-                    else if (state == 8)
+                    else if (state ==  ReportState.FeeInPlat)
                     {
                         //佣金已到平台，未发放给经纪人
                         if (begin > DEF_DATE) { sql += " and DebitedOn>='" + begin.Format() + "'"; }
                         if (end > DEF_DATE) { sql += " and DebitedOn<='" + begin.Format() + "'"; }
                     }
-                    else if (state == 9)
+                    else if (state ==  ReportState.FeePaied)
                     {
                         //佣金已发放
                         if (begin > DEF_DATE) { sql += " and PayFeeOn>='" + begin.Format() + "'"; }
                         if (end > DEF_DATE) { sql += " and PayFeeOn<='" + begin.Format() + "'"; }
                     }
-                    else if (state == 10)
+                    else if (state ==  ReportState.UserRefund)
                     {
                         //用户退房
                         if (begin > DEF_DATE) { sql += " and FailOn>='" + begin.Format() + "'"; }
                         if (end > DEF_DATE) { sql += " and FailOn<='" + begin.Format() + "'"; }
                     }
-                    else if (state == 11)
+                    else if (state ==  ReportState.RefundToPlat)
                     {
                         //退还佣金到平台
                         if (begin > DEF_DATE) { sql += " and ReturnFeeOn>='" + begin.Format() + "'"; }
                         if (end > DEF_DATE) { sql += " and ReturnFeeOn<='" + begin.Format() + "'"; }
                     }
-                    else if (state == 12)
+                    else if (state ==  ReportState.RefundToBuilder)
                     {
                         //退还佣金至开发商
                         if (begin > DEF_DATE) { sql += " and BackFeeOn>='" + begin.Format() + "'"; }
@@ -270,7 +270,7 @@ namespace com.superbroker.data
                         RoomNo = r["RoomNo"].ToString(),
                         HouseNo = r["HouseNo"].ToString(),
                         Fee = r["Fee"].ToInt(),
-                         FeeType=r["FeeType"].ToInt16(),
+                        FeeType = r["FeeType"].ToInt16(),
                         TotalPrice = r["TotalPrice"].ToInt(),
                         ArriveOn = r["ArriveOn"].ToDateTime(),
                         BackFeeOn = r["BackFeeOn"].ToDateTime(),
@@ -280,10 +280,10 @@ namespace com.superbroker.data
                         PayFeeOn = r["PayFeeOn"].ToDateTime(),
                         ProtectedOn = r["ProtectedOn"].ToDateTime(),
                         ReportOn = r["ReportOn"].ToDateTime(),
-                        FailOn=r["FailOn"].ToDateTime(),
+                        FailOn = r["FailOn"].ToDateTime(),
                         ReturnFeeOn = r["ReturnFeeOn"].ToDateTime(),
                         SignedOn = r["SignedOn"].ToDateTime(),
-                        State = r["State"].ToInt16()
+                        State = (ReportState)Enum.Parse(typeof(ReportState), r["State"].ToString())
                     };
                     list.Add(reporting);
                 }
@@ -326,7 +326,7 @@ namespace com.superbroker.data
                         FailOn = r["FailOn"].ToDateTime(),
                         ReturnFeeOn = r["ReturnFeeOn"].ToDateTime(),
                         SignedOn = r["SignedOn"].ToDateTime(),
-                        State = r["State"].ToInt16()
+                        State = (ReportState)Enum.Parse(typeof(ReportState), r["State"].ToString())
                     };
                 }
             }

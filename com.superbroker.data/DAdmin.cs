@@ -49,6 +49,33 @@ namespace com.superbroker.data
             }
         }
 
+        public Admin Get(string openid, string account="") {
+            string sql = "select * from " + Admin.TABLENAME + " where enable=1 and  workno='" + account + "'";
+            if (!string.IsNullOrEmpty(account)) { sql += " and openid='" + openid + "' "; };
+            Admin admin = null;
+            using (DataTable dt = helper.GetDataTable(sql))
+            {
+                if (dt != null && dt.Rows.Count == 1)
+                {
+                    DataRow r = dt.Rows[0];
+                    admin = new Admin()
+                    {
+                        AddOn = DateTime.Parse(r["addon"].ToString()),
+                        OpenId = r["OpenId"].ToString(),
+                        Department = r["Department"].ToString(),
+                        Enable = int.Parse(r["enable"].ToString()) == 1,
+                        Id = int.Parse(r["Id"].ToString()),
+                        Memo = r["Memo"].ToString(),
+                        WorkNo = r["WorkNo"].ToString(),
+                        Password = "",
+                        RoleId = (Role)Enum.Parse(typeof(Role), r["roleId"].ToString()),
+                        Name = r["Name"].ToString()
+                    };
+                }
+            }
+            return admin;
+        }
+
         /// <summary>
         /// 登录
         /// </summary>
@@ -68,13 +95,14 @@ namespace com.superbroker.data
                     admin = new Admin()
                     {
                         AddOn = DateTime.Parse(r["addon"].ToString()),
+                         OpenId = r["OpenId"].ToString(),
                         Department = r["Department"].ToString(),
                         Enable = int.Parse(r["enable"].ToString()) == 1,
                         Id = int.Parse(r["Id"].ToString()),
                         Memo = r["Memo"].ToString(),
                         WorkNo = r["WorkNo"].ToString(),
                         Password = "",
-                        RoleId = int.Parse(r["roleId"].ToString()),
+                        RoleId = (Role)Enum.Parse(typeof(Role),r["roleId"].ToString()),
                         Name = r["Name"].ToString()
                     };
                 }
@@ -110,8 +138,9 @@ namespace com.superbroker.data
             return helper.ExecuteSqlNoResult(sql);
         }
 
-        public bool SetRole(int roleId, string workno)
+        public bool SetRole(Rule role, string workno)
         {
+            int roleId = Convert.ToInt16(role);
             return helper.ExecuteSqlNoResult("update " + Admin.TABLENAME + " set RoleId=" + roleId + " where workno='" + workno + "'");
         }
 
@@ -125,10 +154,10 @@ namespace com.superbroker.data
             return helper.ExecuteSqlNoResult("update " + Admin.TABLENAME + " set enable=" + (enable ? 1 : 0) + " where workno='" + workno + "'");
         }
 
-        public List<Admin> GetList(int Role)
+        public List<Admin> GetList(Rule Role)
         {
             List<Admin> list = new List<Admin>();
-            string sql = "select * from " + Admin.TABLENAME + " where enable=1 and RoleId=" + Role;
+            string sql = "select * from " + Admin.TABLENAME + " where enable=1 and RoleId=" + Convert.ToInt16(Role);
             using (DataTable dt = helper.GetDataTable(sql))
             {
                 foreach (DataRow r in dt.Rows)
@@ -140,10 +169,11 @@ namespace com.superbroker.data
                         Enable = int.Parse(r["enable"].ToString()) == 1,
                         Id = int.Parse(r["Id"].ToString()),
                         Memo = r["Memo"].ToString(),
+                        OpenId = r["OpenId"].ToString(),
                         WorkNo = r["WorkNo"].ToString(),
                         Password = "",
-                        RoleId = int.Parse(r["roleId"].ToString()),
-                        Name=r["Name"].ToString()
+                        RoleId = (Role)Enum.Parse(typeof(Role), r["roleId"].ToString()),
+                        Name =r["Name"].ToString()
                     };
                     list.Add(admin);
                 }

@@ -63,7 +63,7 @@ namespace com.superbroker.data
                         WorkNo = r["WorkNo"].ToString(),
                         Id = r["Id"].ToInt(),
                         Memo = r["Memo"].ToString(),
-                        State = r["state"].ToInt16()                      
+                        State = (ReportState)Enum.Parse(typeof(ReportState), r["state"].ToString())                      
                     };
                     list.Add(log);
                 }

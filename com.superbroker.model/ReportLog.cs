@@ -17,7 +17,7 @@ namespace com.superbroker.model
         /// <summary>
         /// 状态
         /// </summary>
-        public int State { get; set; }
+        public ReportState State { get; set; }
         /// <summary>
         /// 操作人
         /// </summary>

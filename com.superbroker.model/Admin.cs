@@ -21,6 +21,10 @@ namespace com.superbroker.model
         /// </summary>
         public string WorkNo { get; set; }
         /// <summary>
+        /// Openid
+        /// </summary>
+        public string OpenId { get; set; }
+        /// <summary>
         /// 密码
         /// </summary>
         public string Password { get; set; }
@@ -31,7 +35,7 @@ namespace com.superbroker.model
         /// <summary>
         /// 角色
         /// </summary>
-        public Int32 RoleId { get; set; }
+        public Role RoleId { get; set; }
         /// <summary>
         /// 备注
         /// </summary>
@@ -40,5 +44,10 @@ namespace com.superbroker.model
         /// 是否有效
         /// </summary>
         public bool Enable { get; set; }
+    }
+
+    public enum Role
+    {
+        Admin=100,Builder=101,Fund=102,Editer=103,Bussiness=104, Broker=199
     }
 }

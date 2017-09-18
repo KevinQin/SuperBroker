@@ -35,9 +35,9 @@
                         </div>
                     </div> 
                     <div class="weui-cell">
-                        <div class="weui-cell__hd"><label class="weui-label"><i class="iconfont icon-iconfontshouji"></i></label></div>
+                        <div class="weui-cell__hd"><label class="weui-label"><i class="iconfont icon-ganxie1"></i></label></div>
                         <div class="weui-cell__bd">
-                            <input class="weui-input" type="text" id="txtCode" required="required" pattern="[0-9]{5}" placeholder="请填写邀请码"/>
+                            <input class="weui-input" type="text" id="txtCode" required="required" pattern="[0-9]{3}" placeholder="请填写邀请码"/>
                         </div>
                     </div> 
                     <div class="weui-cell">

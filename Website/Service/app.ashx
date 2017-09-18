@@ -143,6 +143,18 @@ public class AppHandler:IHttpHandler,IRequiresSessionState {
                 case 118:
                     Result = GetHelpList(c);//
                     break;
+                case 201:
+                    Result = GetBrokerForCheck(c);//
+                    break;
+                case 202:
+                    Result = UpdateBrokerState(c);
+                    break;
+                case 203:
+                    Result = GetAdminInfo(c);
+                    break;
+                case 204:
+                    Result = GetBrokerList(c);//
+                    break;
                 case 999:
                     Result = Test(c);
                     break;
@@ -156,6 +168,93 @@ public class AppHandler:IHttpHandler,IRequiresSessionState {
         }
         Log.D("[A]Result-" + f + ":" + Result.ToString(), c);
         return ReplaceTableName(Result);
+    }
+
+    private string GetBrokerList(HttpContext c) {
+        string openid = c.Request["openid"];
+        string workno = c.Request["workno"];
+        //业务、管理
+        return "";
+    }
+
+    private string GetAdminInfo(HttpContext c) {
+        string openid = c.Request["openid"].ToString();
+        string workno = c.Request["workno"].ToString();
+        Admin admin = new DAdmin().Get(openid, workno);
+        Member member = new DMember().Get(openid);
+        if (admin != null)
+        {
+            return response.Success(new {
+                Name =admin.Name,
+                WorkNo =admin.WorkNo,
+                RoldId =admin.RoleId,
+                RoleName = GetRoleName((Role)Enum.Parse(typeof(Role),admin.RoleId.ToString())),
+                Enable=admin.Enable,
+                PhotoUrl=member.PhotoUrl,
+                Mobile= member.Mobile
+            });
+        }
+        else {
+            return response.Fail("Error");
+        }
+    }
+
+    private string GetRoleName(Role role) {
+        string result = "";
+        switch (role)
+        {
+            case Role.Admin:
+                result = "管理员";
+                break;
+            case Role.Builder:
+                result = "案场员工";
+                break;
+            case Role.Fund:
+                result = "财务员工";
+                break;
+            case Role.Editer:
+                result = "内容编辑";
+                break;
+            case Role.Bussiness:
+                result = "业务经理";
+                break;
+            case Role.Broker:
+                result = "经纪人";
+                break;
+            default:
+                result = "未知";
+                break;
+        }
+        return result;
+    }
+
+    private string UpdateBrokerState(HttpContext c) {
+        int Id = c.xRequest("id").ToInt();
+        string brokerNo = c.xRequest("bno");
+        string workNo = c.xRequest("wno");
+        int _state = c.xRequest("state").ToInt16();
+        string info = c.xRequest("info");
+        BrokerState state = (BrokerState)Enum.Parse(typeof(BrokerState), _state.ToString());
+
+        Broker broker = new DBroker().Get(Id,"",brokerNo);
+        if (broker == null)
+        {
+            return response.Fail("没有相关的经纪人[-2]");
+        }
+        else if (broker.CheckWorkNo != workNo)
+        {
+            return response.Fail("没有审批权限[-3]");
+        }
+        else {
+            if (new DBroker().ChangeState(brokerNo, Id, workNo, info, state))
+            {
+                return response.Success("审批完成");
+            }
+            else {
+                return response.Fail("审批失败，稍候再试[-4]");
+            }
+
+        }
     }
 
     private string GetHelpList(HttpContext c) {
@@ -366,7 +465,7 @@ public class AppHandler:IHttpHandler,IRequiresSessionState {
         int pageno = c.xRequest("pageno").ToInt16();
         int pagecount = 0;
         if (pageno < 1) { pageno = 1; }
-        List<ReportingSimpleView> list = new DReporting().Get(BrokerNo, state, pageno, out pagecount);
+        List<ReportingSimpleView> list = new DReporting().Get(BrokerNo, (ReportState)Enum.Parse(typeof(ReportState), state.ToString()), pageno, out pagecount);
         return response.Success(list, new { PageCount = pagecount, PageNo = pageno });
     }
 
@@ -438,11 +537,11 @@ public class AppHandler:IHttpHandler,IRequiresSessionState {
         int fee = builder.FeePeer;
         int feeType = builder.FeeType;
         //是否已备案查询
-        List<Reporting> _list = new DReporting().Get( 1, out pageOut,name, mobile, builder.Name, "", "", DEF_DATE, DEF_DATE, 99);
-        int state = 1;
+        List<Reporting> _list = new DReporting().Get(1, out pageOut,name, mobile, builder.Name, "", "", DEF_DATE, DEF_DATE, ReportState.OutFail);
+        ReportState state = ReportState.ReportSuccess;
         if (_list!=null && _list.Count > 0)
         {
-            state = 0;
+            state = ReportState.ReportFail;
             _list.Clear();
             _list = null;
         }
@@ -455,13 +554,13 @@ public class AppHandler:IHttpHandler,IRequiresSessionState {
         int id = 0;
         if ( new DReporting().Add(out id, report))
         {
-            if (state == 1)
+            if (state ==  ReportState.ReportSuccess)
             {
                 if (id > 0)
                 {
                     //增加一条日志
                     ReportLog log = new ReportLog() {
-                        AddOn=DateTime.Now, Memo="成功报备", ReportNo=report.ReportNo, State=state, WorkNo= BrokerNo
+                        AddOn=DateTime.Now, Memo="成功报备", ReportNo=report.ReportNo, State=ReportState.ReportSuccess, WorkNo= BrokerNo
                     };
                     new DReportLog().Add(out id, log);
                     return response.Success(report.ReportNo);
@@ -472,7 +571,7 @@ public class AppHandler:IHttpHandler,IRequiresSessionState {
             }
             else {
                 ReportLog log = new ReportLog() {
-                    AddOn=DateTime.Now, Memo="报备失败", ReportNo=report.ReportNo, State=state, WorkNo= BrokerNo
+                    AddOn=DateTime.Now, Memo="报备失败", ReportNo=report.ReportNo, State=ReportState.ReportSuccess, WorkNo= BrokerNo
                 };
                 return response.Fail("备案失败，该客户已报备",-7);
             }
@@ -524,6 +623,28 @@ public class AppHandler:IHttpHandler,IRequiresSessionState {
         }
     }
 
+    private string GetBrokerForCheck(HttpContext c) {
+        int workerno = c.xRequest("wno").ToInt();
+        int brokerno = c.xRequest("bno").ToInt();
+        int id = c.xRequest("state").ToInt();
+        Broker broker = new DBroker().Get(id,"",brokerno.ToString());
+        if (broker == null)
+        {
+            return response.Fail("没有相关的经纪人[-2]");
+        }
+        else if (Convert.ToInt32(broker.CheckWorkNo) != workerno)
+        {
+            return response.Fail("没有审批权限[-3]");
+        }
+        else if (broker.State!= BrokerState.New)
+        {
+            return response.Fail("该经纪人已审批[-4]");
+        }
+        else {
+            return response.Success(broker);
+        }
+    }
+
     private string GetBrokerInfo(HttpContext c) {
         string openid = c.Request["openid"].ToString();
         Broker broker = new DBroker().Get(0, openid);
@@ -538,10 +659,33 @@ public class AppHandler:IHttpHandler,IRequiresSessionState {
         string openid = c.Request["openid"].ToString();
         string pwd = c.Request["pwd"].ToString();
         int ErrCode = 0;
-        Broker broker= new DBroker().Login(openid, account, pwd, out ErrCode);
+        Role RoleId =  Role.Broker;
+        if (account.Length == 3 ) {
+            int.TryParse(account, out ErrCode);
+            if (ErrCode > 100) { RoleId =  Role.Admin; }
+            ErrCode = 0;
+        }
+        object obj = null;
+        if (RoleId== Role.Admin)
+        {
+            Admin admin = new DAdmin().Login(account, pwd);
+
+            obj = admin;
+            if (obj == null)
+            {
+                ErrCode = 0;
+            }
+            else {
+                ErrCode = 1;
+                RoleId = admin.RoleId;
+            }
+        }
+        else {
+            obj= new DBroker().Login(openid, account, pwd, out ErrCode);
+        }
         if (ErrCode == 1)
         {
-            return response.Success(broker);
+            return response.Success(obj,new { RoleId = RoleId});
         }
         else {
             return response.Fail("login fail", ErrCode*-1);
@@ -554,30 +698,63 @@ public class AppHandler:IHttpHandler,IRequiresSessionState {
         string pwd = c.Request["pwd"].ToString();
         string openid = c.Request["openid"].ToString();
         int code = c.Request["code"].ToInt();
+        if (!new DAdmin().GetAdminByWorkNo(code.ToString())) {
+            return response.Fail("邀请码无效", -4);
+        }
+
         Member member = new DMember().Get(openid);
-        Broker broker = new Broker() {
-            AccountName="", AddOn=DateTime.Now, Address="",
-            Area=member.Country+","+member.Province+","+member.City, AvatarMediaId=member.PhotoUrl,
-            BankCardNo="", BankInfo="", CheckInfo="等待审核", CheckOn=DEF_DATE, CheckWorkNo=code.ToString(), Company="",
-            FeePeer=0, Gender=member.Gender, Memo="", Mobile=mobile, Name=name,
-            OpenId=openid, Password=pwd, State= 0, Tel="", Trade="", UnionId="", UptimeOn=DEF_DATE, WorkNo=""
-        };
-        int Id = 0;
-        if (new DBroker().Add(out Id, broker))
+        Broker b= new DBroker().Get(0, openid);
+        if (b == null)
         {
-            if (Id > 0)
+            int WorkNo = new DBroker().GetWorkNo();
+            Broker broker = new Broker()
             {
-                Log.D("注册经纪人成功【" + broker.Name + "," + broker.Mobile + "】，邀请码【" + code + "】",c);
-                return response.Success("注册成功");
+                AccountName = "",
+                AddOn = DateTime.Now,
+                Address = "",
+                Area = member.Country + "," + member.Province + "," + member.City,
+                AvatarMediaId = member.PhotoUrl,
+                BankCardNo = "",
+                BankInfo = "",
+                CheckInfo = "等待审核",
+                CheckOn = DEF_DATE,
+                CheckWorkNo = code.ToString(),
+                Company = "",
+                FeePeer = 0,
+                Gender = member.Gender,
+                Memo = "",
+                Mobile = mobile,
+                Name = name,
+                OpenId = openid,
+                Password = pwd,
+                State =  BrokerState.New,
+                Tel = "",
+                Trade = "",
+                UnionId = "",
+                UptimeOn = DEF_DATE,
+                WorkNo = WorkNo.ToString()
+            };
+            int Id = 0;
+            if (new DBroker().Add(out Id, broker))
+            {
+                if (Id > 0)
+                {
+                    Log.D("注册经纪人成功【" + broker.Name + "," + broker.Mobile + "】，邀请码【" + code + "】", c);
+                    return response.Success("注册成功");
+                }
+                else
+                {
+                    Log.D("注册经纪人失败【" + broker.Name + "," + broker.Mobile + "】，邀请码【" + code + "】", c);
+                    return response.Fail("注册失败", -1);
+                }
             }
             else
             {
-                Log.D("注册经纪人失败【" + broker.Name + "," + broker.Mobile + "】，邀请码【" + code + "】",c);
-                return response.Fail("注册失败",-1);
+                return response.Fail("注册失败", -2);
             }
         }
         else {
-            return response.Fail("注册失败",-2);
+            return response.Fail("已注册，不能重复注册", -3);
         }
     }
 

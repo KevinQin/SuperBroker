@@ -744,6 +744,7 @@ var BuilderList = {
 var LoginPage = {
     init: function () {
         var code = getParam("code");
+        
         if (code == "") { return GetWechatLink("broker","login.aspx"); }
         var openid = $get('openid');
         
@@ -782,10 +783,30 @@ var LoginPage = {
     login_cb: function (o) {
         if (o.Return == 0) {
             $set('account', $("#txtAccount").val());
+            $set('RoleId', o.Ext.RoleId);
             weui.toast('登录成功', {
                 duration: 1500,
                 className: 'custom-classname',
-                callback: function () { $go("../builder/list.aspx"); }
+                callback: function () {
+                    if (o.Ext.RoleId == 199) {
+                        $go("../builder/list.aspx");
+                    }
+                    else if (o.Ext.RoleId==100) {
+                        $go("../report/reportdata.aspx");
+                    }
+                    else if (o.Ext.RoleId == 101) {
+                        $go("../work/checkInBuilder.aspx");
+                    }
+                    else if (o.Ext.RoleId == 102) {
+                        $go("../work/needPayFee.aspx");
+                    } 
+                    else if (o.Ext.RoleId == 103) {
+                        $go("../builder/list.aspx");
+                    } 
+                    else if (o.Ext.RoleId == 104) {
+                        $go("../work/checklist.aspx");
+                    } 
+                }
             });
         }
         else {
@@ -841,7 +862,7 @@ var RegisterPage = {
             });
         }
         else {
-            weui.toast(o.Msg, 3000);
+            weui.alert(o.Msg);
         }
     }
 };
@@ -1011,6 +1032,12 @@ function getMemberInfoCallBack(o) {
 }
 
 function GetWechatLink(folder, page) {
-    $go("https://open.weixin.qq.com/connect/oauth2/authorize?appid=wx9a6c6b62bc80e7d8&redirect_uri=http%3a%2f%2fb.seascapeapp.cn%2fapp%2f" + folder + "%2f" + page + "&response_type=code&scope=snsapi_userinfo&state=i#wechat_redirect");
+    if ($isDebug) {
+        $set('openid', debug_openId, cookie_obj);
+        window.location.href = window.location.href + "?code=123";
+    }
+    else {
+        $go("https://open.weixin.qq.com/connect/oauth2/authorize?appid=wx9a6c6b62bc80e7d8&redirect_uri=http%3a%2f%2fb.seascapeapp.cn%2fapp%2f" + folder + "%2f" + page + "&response_type=code&scope=snsapi_userinfo&state=i#wechat_redirect");
+    }
 }
 

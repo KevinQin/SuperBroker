@@ -139,6 +139,11 @@ ul {
         padding-bottom: 10px;
         text-align: center
     }
+
+    .weui-textarea {
+        font-size: @font-size-xs;
+        font-family: -apple-system-font,Helvetica Neue,Helvetica,sans-serif,Microsoft YaHei,Tahoma,Roboto,Droid Sans;
+    }
 }
 
 .js_show {
@@ -588,6 +593,12 @@ ul {
 }
 
 .register-page {
+    .tip-row {
+        font-size: @font-size-xxs;
+        color: @warning-color;
+        padding-left: .5rem;
+    }
+
     .logo-row {
         text-align: center;
         line-height: 0;
@@ -638,7 +649,6 @@ ul {
             i {
                 font-size: @font-size-m;
             }
-
         }
 
         .weui-select {
@@ -663,8 +673,14 @@ ul {
                 font-weight: 600;
             }
 
-            span{font-size:@font-size-xs;color:@black-color;}
-            .gray{color:@gray-color;}
+            span {
+                font-size: @font-size-xs;
+                color: @black-color;
+            }
+
+            .gray {
+                color: @gray-color;
+            }
 
             input[type=password] {
                 font-size: @font-size-xs;
